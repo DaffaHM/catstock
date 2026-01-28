@@ -1,5 +1,6 @@
 import { getSession } from '@/lib/auth'
 import { getQuickSession } from '@/lib/auth-quick'
+import SimpleNavLayout from '@/components/layout/SimpleNavLayout'
 
 export const metadata = {
   title: 'Pengaturan - CatStock',
@@ -42,13 +43,18 @@ export default async function SettingsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-4xl mx-auto p-6">
+    <SimpleNavLayout>
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">
+              Pengaturan {isDemoMode && <span className="text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded-full ml-2">Demo</span>}
+            </h1>
+            <p className="text-gray-600 mt-1">Kelola pengaturan aplikasi dan profil</p>
+          </div>
+        </div>
+
         <div className="bg-white rounded-lg shadow p-6">
-          <h1 className="text-2xl font-bold text-gray-900 mb-6">
-            Pengaturan {isDemoMode && <span className="text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded-full ml-2">Demo</span>}
-          </h1>
-          
           <div className="space-y-6">
             {/* User Info */}
             <div className="border-b pb-6">
@@ -132,6 +138,6 @@ export default async function SettingsPage() {
           </div>
         </div>
       </div>
-    </div>
+    </SimpleNavLayout>
   )
 }

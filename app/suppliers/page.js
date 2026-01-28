@@ -1,5 +1,6 @@
 import { getSession } from '@/lib/auth'
 import { getQuickSession } from '@/lib/auth-quick'
+import SimpleNavLayout from '@/components/layout/SimpleNavLayout'
 import SupplierListPage from '@/components/suppliers/SupplierListPage'
 
 export const metadata = {
@@ -42,5 +43,9 @@ export default async function SuppliersPage() {
     )
   }
 
-  return <SupplierListPage session={session} isDemoMode={isDemoMode} />
+  return (
+    <SimpleNavLayout>
+      <SupplierListPage session={session} isDemoMode={isDemoMode} />
+    </SimpleNavLayout>
+  )
 }

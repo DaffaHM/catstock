@@ -1,5 +1,6 @@
 import { getSession } from '@/lib/auth'
 import { getQuickSession } from '@/lib/auth-quick'
+import SimpleNavLayout from '@/components/layout/SimpleNavLayout'
 import ProductListPage from '@/components/products/ProductListPage'
 
 export const metadata = {
@@ -42,5 +43,9 @@ export default async function ProductsPage() {
     )
   }
 
-  return <ProductListPage session={session} isDemoMode={isDemoMode} />
+  return (
+    <SimpleNavLayout>
+      <ProductListPage session={session} isDemoMode={isDemoMode} />
+    </SimpleNavLayout>
+  )
 }

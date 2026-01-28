@@ -142,7 +142,7 @@ export default function DashboardContent({ session, isDemoMode = false }) {
 
   if (loading) {
     return (
-      <div className="p-6">
+      <div className="space-y-6">
         <div className="animate-pulse">
           <div className="mb-8">
             <div className="h-8 bg-gray-200 rounded w-48 mb-2"></div>
@@ -194,11 +194,11 @@ export default function DashboardContent({ session, isDemoMode = false }) {
 
   // Dashboard should always have data now (either real or demo)
   return (
-    <div className="p-6">
+    <div className="space-y-6">
       {/* Header */}
-      <div className="mb-8 flex items-center justify-between">
+      <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">
+          <h1 className="text-2xl font-bold text-gray-900">
             Dashboard {isDemoMode && <span className="text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded-full ml-2">Demo</span>}
           </h1>
           <p className="text-gray-600">

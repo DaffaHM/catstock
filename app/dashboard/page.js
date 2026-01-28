@@ -1,5 +1,6 @@
 import { getSession } from '@/lib/auth'
 import { getQuickSession } from '@/lib/auth-quick'
+import SimpleNavLayout from '@/components/layout/SimpleNavLayout'
 import DashboardContent from '@/components/dashboard/DashboardContent'
 import { testDatabaseConnection } from '@/lib/prisma'
 
@@ -114,7 +115,11 @@ export default async function DashboardPage() {
       )
     }
 
-    return <DashboardContent session={session} isDemoMode={isDemoMode} />
+    return (
+      <SimpleNavLayout>
+        <DashboardContent session={session} isDemoMode={isDemoMode} />
+      </SimpleNavLayout>
+    )
     
   } catch (criticalError) {
     console.error('[Dashboard] Critical error:', criticalError)
