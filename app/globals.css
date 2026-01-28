@@ -1,0 +1,214 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    /* Prevent zoom on iPad when focusing inputs */
+    -webkit-text-size-adjust: 100%;
+    /* Smooth scrolling for better iPad experience */
+    scroll-behavior: smooth;
+  }
+  
+  body {
+    /* Prevent overscroll bounce on iPad Safari */
+    overscroll-behavior: none;
+    /* Optimize font rendering for iPad */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    /* Minimum font size for iPad readability */
+    font-size: 16px;
+    line-height: 1.5;
+  }
+
+  /* Prevent double-tap zoom on iPad */
+  button, input, select, textarea {
+    touch-action: manipulation;
+  }
+
+  /* Improve touch targets for iPad */
+  button, a, [role="button"] {
+    min-height: 44px;
+    min-width: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+@layer components {
+  /* Touch-friendly button styles */
+  .btn {
+    @apply inline-flex items-center justify-center px-4 py-3 text-base font-medium rounded-lg transition-all duration-150 ease-in-out;
+    @apply min-h-[44px] min-w-[44px];
+    @apply active:scale-95 focus:outline-none focus:ring-2 focus:ring-offset-2;
+  }
+
+  .btn-primary {
+    @apply bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500;
+  }
+
+  .btn-secondary {
+    @apply bg-secondary-100 text-secondary-900 hover:bg-secondary-200 focus:ring-secondary-500;
+  }
+
+  .btn-danger {
+    @apply bg-red-600 text-white hover:bg-red-700 focus:ring-red-500;
+  }
+
+  /* Touch-friendly input styles */
+  .input {
+    @apply w-full px-4 py-3 text-base border border-gray-300 rounded-lg;
+    @apply min-h-[44px] focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent;
+    @apply placeholder-gray-400;
+  }
+
+  .input-error {
+    @apply border-red-500 focus:ring-red-500;
+  }
+
+  /* Card component for iPad layout */
+  .card {
+    @apply bg-white rounded-lg shadow-sm border border-gray-200;
+  }
+
+  .card-header {
+    @apply px-6 py-4 border-b border-gray-200;
+  }
+
+  .card-body {
+    @apply px-6 py-4;
+  }
+
+  /* Split view layout for iPad landscape */
+  .split-view {
+    @apply flex h-full;
+  }
+
+  .split-view-master {
+    @apply w-2/5 border-r border-gray-200 bg-gray-50;
+  }
+
+  .split-view-detail {
+    @apply flex-1 bg-white;
+  }
+
+  /* Navigation styles for iPad */
+  .nav-sidebar {
+    @apply w-64 bg-white border-r border-gray-200 flex flex-col;
+  }
+
+  .nav-bottom {
+    @apply fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200;
+    @apply flex items-center justify-around py-2;
+    @apply safe-area-inset-bottom;
+  }
+
+  .nav-item {
+    @apply flex flex-col items-center justify-center p-3 text-sm;
+    @apply min-h-[44px] min-w-[44px] rounded-lg transition-colors;
+    @apply hover:bg-gray-100 active:bg-gray-200;
+  }
+
+  .nav-item.active {
+    @apply text-primary-600 bg-primary-50;
+  }
+
+  /* Table styles optimized for iPad */
+  .table-container {
+    @apply overflow-x-auto -mx-4 sm:mx-0;
+  }
+
+  .table {
+    @apply min-w-full divide-y divide-gray-200;
+  }
+
+  .table th {
+    @apply px-4 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider;
+    @apply sticky top-0 bg-gray-50 z-10;
+  }
+
+  .table td {
+    @apply px-4 py-4 whitespace-nowrap text-sm text-gray-900;
+  }
+
+  .table tr {
+    @apply hover:bg-gray-50 cursor-pointer;
+  }
+
+  /* Drawer/Sheet styles for iPad */
+  .drawer {
+    @apply fixed inset-y-0 right-0 w-96 bg-white shadow-xl border-l border-gray-200;
+    @apply transform transition-transform duration-300 ease-in-out;
+    @apply z-50;
+  }
+
+  .drawer.closed {
+    @apply translate-x-full;
+  }
+
+  .drawer-header {
+    @apply px-6 py-4 border-b border-gray-200 flex items-center justify-between;
+  }
+
+  .drawer-body {
+    @apply flex-1 overflow-y-auto px-6 py-4;
+  }
+
+  .drawer-footer {
+    @apply px-6 py-4 border-t border-gray-200;
+  }
+
+  /* Quantity stepper for touch interaction */
+  .quantity-stepper {
+    @apply flex items-center border border-gray-300 rounded-lg overflow-hidden;
+  }
+
+  .quantity-stepper button {
+    @apply w-12 h-12 flex items-center justify-center text-lg font-medium;
+    @apply bg-gray-50 hover:bg-gray-100 active:bg-gray-200;
+    @apply border-r border-gray-300 last:border-r-0;
+  }
+
+  .quantity-stepper input {
+    @apply flex-1 h-12 text-center border-0 focus:ring-0;
+  }
+}
+
+@layer utilities {
+  /* Safe area utilities for iPad */
+  .safe-area-inset-top {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  .safe-area-inset-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .safe-area-inset-left {
+    padding-left: env(safe-area-inset-left);
+  }
+
+  .safe-area-inset-right {
+    padding-right: env(safe-area-inset-right);
+  }
+
+  /* Touch feedback animation */
+  .touch-feedback {
+    @apply transition-transform duration-100 ease-in-out;
+  }
+
+  .touch-feedback:active {
+    @apply scale-95;
+  }
+
+  /* Hide scrollbar but keep functionality */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}

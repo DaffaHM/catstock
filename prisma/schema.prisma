@@ -1,0 +1,128 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  transactions StockTransaction[]
+
+  @@map("users")
+}
+
+model Product {
+  id            String   @id @default(cuid())
+  sku           String   @unique
+  brand         String
+  name          String
+  category      String
+  size          String
+  unit          String
+  purchasePrice Float?
+  sellingPrice  Float?
+  minimumStock  Int?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  transactionItems TransactionItem[]
+  stockMovements   StockMovement[]
+
+  @@index([sku])
+  @@index([brand, category])
+  @@index([name])
+  @@index([category])
+  @@index([minimumStock])
+  @@index([updatedAt])
+  @@map("products")
+}
+
+model Supplier {
+  id        String   @id @default(cuid())
+  name      String
+  contact   String?
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  transactions StockTransaction[]
+
+  @@index([name])
+  @@index([createdAt])
+  @@map("suppliers")
+}
+
+model StockTransaction {
+  id              String   @id @default(cuid())
+  referenceNumber String   @unique
+  type            String   // 'IN', 'OUT', 'ADJUST', 'RETURN_IN', 'RETURN_OUT'
+  transactionDate DateTime
+  supplierId      String?
+  userId          String
+  notes           String?
+  totalValue      Float?
+  createdAt       DateTime @default(now())
+
+  supplier Supplier? @relation(fields: [supplierId], references: [id])
+  user     User      @relation(fields: [userId], references: [id])
+  items    TransactionItem[]
+  movements StockMovement[]
+
+  @@index([transactionDate])
+  @@index([type])
+  @@index([createdAt])
+  @@index([supplierId])
+  @@index([type, transactionDate])
+  @@index([transactionDate, createdAt])
+  @@map("stock_transactions")
+}
+
+model TransactionItem {
+  id            String   @id @default(cuid())
+  transactionId String
+  productId     String
+  quantity      Int
+  unitCost      Float?
+  unitPrice     Float?
+  createdAt     DateTime @default(now())
+
+  transaction StockTransaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  product     Product          @relation(fields: [productId], references: [id])
+
+  @@index([transactionId])
+  @@index([productId])
+  @@map("transaction_items")
+}
+
+model StockMovement {
+  id             String   @id @default(cuid())
+  productId      String
+  transactionId  String
+  movementType   String   // 'IN', 'OUT', 'ADJUST', 'RETURN_IN', 'RETURN_OUT'
+  quantityBefore Int
+  quantityChange Int
+  quantityAfter  Int
+  createdAt      DateTime @default(now())
+
+  product     Product          @relation(fields: [productId], references: [id])
+  transaction StockTransaction @relation(fields: [transactionId], references: [id])
+
+  @@index([productId, createdAt])
+  @@index([transactionId])
+  @@index([createdAt])
+  @@index([movementType])
+  @@index([productId, createdAt, quantityAfter])
+  @@map("stock_movements")
+}
