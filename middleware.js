@@ -17,6 +17,7 @@ export async function middleware(request) {
     pathname === '/final-working-test' ||
     pathname === '/test-indonesia' ||
     pathname === '/test-final' ||
+    pathname === '/test-complete' ||
     pathname === '/tutorial' ||
     pathname === '/panduan-cepat' ||
     pathname === '/simple-test' ||
