@@ -10,13 +10,16 @@ import {
   SettingsIcon,
   BarChart3Icon,
   SlidersIcon,
-  RotateCcwIcon
+  RotateCcwIcon,
+  FolderIcon
 } from 'lucide-react'
 import LogoutButton from '../LogoutButton'
+import Logo, { CompactLogo } from '../ui/Logo'
 
 const navigationItems = [
   { name: 'Dasbor', href: '/dashboard', icon: HomeIcon },
   { name: 'Produk', href: '/products', icon: PackageIcon },
+  { name: 'Kategori', href: '/categories', icon: FolderIcon },
   { name: 'Pemasok', href: '/suppliers', icon: TruckIcon },
   { name: 'Stok Masuk', href: '/transactions/stock-in', icon: ArrowUpIcon },
   { name: 'Stok Keluar', href: '/transactions/stock-out', icon: ArrowDownIcon },
@@ -37,7 +40,7 @@ export default function SimpleNavLayout({ children }) {
         <div className="w-64 bg-white border-r border-gray-200 flex flex-col">
           {/* Header */}
           <div className="h-16 flex items-center px-4 border-b border-gray-200">
-            <h1 className="text-xl font-semibold text-gray-900">CatStock</h1>
+            <Logo size="md" variant="full" />
           </div>
 
           {/* Navigation */}
@@ -93,7 +96,7 @@ export default function SimpleNavLayout({ children }) {
         {/* Header */}
         <header className="bg-white border-b border-gray-200 px-4 py-3">
           <div className="flex items-center justify-between">
-            <h1 className="text-xl font-semibold text-gray-900">CatStock</h1>
+            <CompactLogo />
             <div className="flex items-center space-x-2">
               <a href="/tutorial" className="p-2 rounded-lg hover:bg-gray-100 transition-colors" aria-label="Tutorial">
                 <svg className="h-5 w-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">

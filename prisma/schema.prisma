@@ -19,6 +19,10 @@ model User {
   updatedAt    DateTime @updatedAt
 
   transactions StockTransaction[]
+  priceHistory PriceHistory[]
+  notifications Notification[]
+  activityLogs ActivityLog[]
+  systemSettings SystemSetting[]
 
   @@map("users")
 }
@@ -34,17 +38,22 @@ model Product {
   purchasePrice Float?
   sellingPrice  Float?
   minimumStock  Int?
+  reorderPoint  Int?     @default(0)
+  lastPriceUpdate DateTime?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
   transactionItems TransactionItem[]
   stockMovements   StockMovement[]
+  categories       ProductCategory[]
+  priceHistory     PriceHistory[]
 
   @@index([sku])
   @@index([brand, category])
   @@index([name])
   @@index([category])
   @@index([minimumStock])
+  @@index([reorderPoint])
   @@index([updatedAt])
   @@map("products")
 }
@@ -125,4 +134,113 @@ model StockMovement {
   @@index([movementType])
   @@index([productId, createdAt, quantityAfter])
   @@map("stock_movements")
+}
+
+// Category Management Models
+model Category {
+  id        String   @id @default(cuid())
+  name      String
+  parentId  String?
+  parent    Category? @relation("CategoryHierarchy", fields: [parentId], references: [id])
+  children  Category[] @relation("CategoryHierarchy")
+  products  ProductCategory[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([parentId])
+  @@index([name])
+  @@map("categories")
+}
+
+model ProductCategory {
+  id         String  @id @default(cuid())
+  productId  String
+  categoryId String
+  product    Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  
+  @@unique([productId, categoryId])
+  @@map("product_categories")
+}
+
+// Price History Model
+model PriceHistory {
+  id            String   @id @default(cuid())
+  productId     String
+  priceType     String   // 'PURCHASE' | 'SELLING'
+  oldPrice      Float?
+  newPrice      Float
+  effectiveDate DateTime @default(now())
+  reason        String?
+  userId        String
+  product       Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user          User     @relation(fields: [userId], references: [id])
+  
+  @@index([productId, priceType])
+  @@index([effectiveDate])
+  @@map("price_history")
+}
+
+// Notification Models
+model NotificationRule {
+  id         String   @id @default(cuid())
+  name       String
+  type       String   // 'LOW_STOCK' | 'PRICE_CHANGE' | 'SYSTEM_EVENT'
+  conditions String   // JSON string
+  actions    String   // JSON string
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  
+  @@map("notification_rules")
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  type      String
+  title     String
+  message   String
+  data      String?  // JSON string
+  isRead    Boolean  @default(false)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+  
+  @@index([userId, isRead])
+  @@index([createdAt])
+  @@map("notifications")
+}
+
+// Activity Log Model
+model ActivityLog {
+  id          String   @id @default(cuid())
+  userId      String
+  action      String   // 'CREATE' | 'UPDATE' | 'DELETE' | 'LOGIN' | etc.
+  entityType  String?  // 'PRODUCT' | 'SUPPLIER' | 'TRANSACTION' | etc.
+  entityId    String?
+  details     String?  // JSON string
+  ipAddress   String?
+  userAgent   String?
+  timestamp   DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id])
+  
+  @@index([userId, timestamp])
+  @@index([action, timestamp])
+  @@index([entityType, entityId])
+  @@map("activity_logs")
+}
+
+// System Settings Model
+model SystemSetting {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  value       String   // JSON string
+  description String?
+  category    String   // 'BUSINESS' | 'NOTIFICATION' | 'UI' | 'BACKUP'
+  updatedAt   DateTime @updatedAt
+  updatedBy   String
+  user        User     @relation(fields: [updatedBy], references: [id])
+  
+  @@index([category])
+  @@map("system_settings")
 }
