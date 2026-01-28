@@ -58,6 +58,7 @@ export default function CategoryForm({
 
   // Helper to check if a category is descendant of another
   const isDescendantOf = (category, ancestorId) => {
+    if (!category || !ancestorId) return false
     if (category.parentId === ancestorId) return true
     
     const parent = findCategoryById(categories, category.parentId)
@@ -70,6 +71,8 @@ export default function CategoryForm({
 
   // Helper to find category by ID in tree structure
   const findCategoryById = (cats, id) => {
+    if (!cats || !id) return null
+    
     for (const cat of cats) {
       if (cat.id === id) return cat
       if (cat.children) {

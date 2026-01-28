@@ -195,7 +195,7 @@ export default function LowStockAlerts({ alerts: initialAlerts }) {
                         {alert.brand} {alert.name}
                       </h3>
                       <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${style.badge}`}>
-                        {alert.urgencyLevel.toUpperCase()}
+                        {alert.urgencyLevel ? alert.urgencyLevel.toUpperCase() : 'UNKNOWN'}
                       </span>
                     </div>
                     

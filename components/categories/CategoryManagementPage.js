@@ -180,8 +180,7 @@ export default function CategoryManagementPage() {
                       Kategori Induk
                     </label>
                     <p className="text-gray-600">
-                      {/* Find parent name - simplified for demo */}
-                      Kategori Induk
+                      {selectedCategory.parentId ? 'Ada Kategori Induk' : 'Kategori Utama'}
                     </p>
                   </div>
                 )}

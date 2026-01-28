@@ -32,7 +32,7 @@ export default function CategoryTree({
     return (
       <div key={category.id} className="select-none">
         <div 
-          className={`flex items-center py-2 px-3 rounded-lg cursor-pointer transition-colors ${
+          className={`group flex items-center py-2 px-3 rounded-lg cursor-pointer transition-colors ${
             isSelected 
               ? 'bg-blue-50 border border-blue-200' 
               : 'hover:bg-gray-50'
