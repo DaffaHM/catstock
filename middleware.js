@@ -20,6 +20,7 @@ export async function middleware(request) {
     pathname === '/panduan-cepat' ||
     pathname === '/simple-test' ||
     pathname === '/debug-nav' ||
+    pathname === '/debug-auth' ||
     pathname === '/comprehensive-test' ||
     pathname === '/working-test' ||
     pathname.startsWith('/_next/') ||
