@@ -1,243 +1,259 @@
-# CatStock - Paint Store Inventory Management
+# 🎨 CatStock - Sistem Manajemen Inventori Toko Cat
 
-A modern, tablet-first inventory management system designed specifically for paint stores, optimized for iPad Pro 11-inch devices.
+<div align="center">
 
-## 🎯 Features
+![CatStock Logo](https://img.shields.io/badge/CatStock-Inventory%20Management-blue?style=for-the-badge&logo=react)
 
-- **Tablet-First Design**: Optimized for iPad Pro 11" with touch-friendly interfaces
-- **Inventory Management**: Complete product catalog with SKU tracking
-- **Stock Transactions**: IN, OUT, ADJUST, RETURN operations with atomic processing
-- **Supplier Management**: Track vendors and supplier relationships
-- **Real-time Reports**: Stock levels, transaction history, and analytics
-- **CSV Export**: Export data for external use
-- **Secure Authentication**: Single-user system with secure session management
+**Sistem manajemen inventori toko cat yang dioptimalkan untuk iPad Pro 11"**
 
-## 🛠 Tech Stack
+[![Next.js](https://img.shields.io/badge/Next.js-14-black?style=flat-square&logo=next.js)](https://nextjs.org/)
+[![React](https://img.shields.io/badge/React-18-blue?style=flat-square&logo=react)](https://reactjs.org/)
+[![Prisma](https://img.shields.io/badge/Prisma-ORM-2D3748?style=flat-square&logo=prisma)](https://prisma.io/)
+[![SQLite](https://img.shields.io/badge/SQLite-Database-003B57?style=flat-square&logo=sqlite)](https://sqlite.org/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind-CSS-38B2AC?style=flat-square&logo=tailwind-css)](https://tailwindcss.com/)
 
-- **Frontend**: Next.js 14 (App Router), React 18, Tailwind CSS
-- **Backend**: Next.js API Routes, Server Actions
-- **Database**: SQLite (development), PostgreSQL (production)
-- **ORM**: Prisma
-- **Authentication**: NextAuth.js with credentials provider
-- **Validation**: Zod schemas
-- **Styling**: Tailwind CSS with iPad-optimized components
+[🚀 Demo](#demo) • [📖 Tutorial](#tutorial) • [⚡ Quick Start](#quick-start) • [🛠️ Installation](#installation)
 
-## 🚀 Quick Start
+</div>
+
+---
+
+## 🎯 Tentang CatStock
+
+CatStock adalah aplikasi web modern untuk mengelola inventori toko cat yang dirancang khusus untuk iPad Pro 11". Aplikasi ini menyediakan solusi lengkap untuk:
+
+- 📦 **Manajemen Produk** - Kelola katalog produk cat dengan mudah
+- 🚚 **Data Pemasok** - Atur informasi supplier dan kontak
+- ⬆️⬇️ **Transaksi Stok** - Catat stok masuk, keluar, dan penyesuaian
+- 📊 **Laporan Bisnis** - Analisis penjualan dan performa inventori
+- 💰 **Mata Uang Rupiah** - Format harga dalam Rupiah Indonesia
+- 🇮🇩 **Bahasa Indonesia** - Interface lengkap dalam bahasa Indonesia
+
+## ✨ Fitur Utama
+
+### 🏠 Dashboard Komprehensif
+- Ringkasan bisnis real-time
+- Alert stok minimum
+- Aktivitas transaksi terbaru
+- Statistik penjualan
+
+### 📱 Optimasi iPad Pro 11"
+- Touch-friendly interface
+- Responsive design (portrait/landscape)
+- Gesture navigation
+- Keyboard shortcuts
+
+### 🔐 Keamanan & Authentication
+- JWT-based authentication
+- Session management
+- CSRF protection
+- Secure middleware
+
+### 📊 Laporan & Analytics
+- Laporan stok real-time
+- Analisis penjualan
+- Export data ke CSV
+- Grafik performa
+
+## 🚀 Demo
+
+### Akun Demo
+```
+Email: owner@catstock.com
+Password: admin123
+```
+
+### Screenshot
+*Coming soon - Screenshots akan ditambahkan*
+
+## 📖 Tutorial
+
+CatStock dilengkapi dengan tutorial interaktif yang komprehensif:
+
+- **📚 Tutorial Lengkap** - Panduan step-by-step di `/tutorial`
+- **⚡ Panduan Cepat** - Quick start guide di `/panduan-cepat`
+- **🧪 Test Pages** - Halaman test untuk debugging di `/test-indonesia`
+
+## ⚡ Quick Start
+
+### 1. Clone Repository
+```bash
+git clone https://github.com/DaffaHM/catstock.git
+cd catstock
+```
+
+### 2. Install Dependencies
+```bash
+npm install
+```
+
+### 3. Setup Database
+```bash
+# Generate Prisma client
+npx prisma generate
+
+# Setup database
+npx prisma db push
+
+# Seed initial data
+npm run seed
+```
+
+### 4. Setup Environment
+```bash
+# Copy environment file
+cp .env.example .env.local
+
+# Edit .env.local dengan konfigurasi Anda
+```
+
+### 5. Run Development Server
+```bash
+npm run dev
+```
+
+Buka [http://localhost:3000](http://localhost:3000) dan login dengan akun demo.
+
+## 🛠️ Installation
 
 ### Prerequisites
-
 - Node.js 18+ 
-- npm or yarn
+- npm atau yarn
+- Git
 
-### Installation
+### Detailed Setup
 
-1. **Clone and install dependencies**
+1. **Clone & Install**
    ```bash
+   git clone https://github.com/DaffaHM/catstock.git
+   cd catstock
    npm install
    ```
 
-2. **Set up environment variables**
+2. **Database Setup**
+   ```bash
+   npx prisma generate
+   npx prisma db push
+   npm run seed
+   ```
+
+3. **Environment Configuration**
    ```bash
    cp .env.example .env.local
    ```
    
-   Update `.env.local` with your configuration:
+   Edit `.env.local`:
    ```env
    DATABASE_URL="file:./dev.db"
+   JWT_SECRET="your-secret-key-change-in-production"
+   NEXTAUTH_SECRET="your-nextauth-secret"
    NEXTAUTH_URL="http://localhost:3000"
-   NEXTAUTH_SECRET="your-secret-key-here"
-   NODE_ENV="development"
    ```
 
-3. **Set up the database**
-   ```bash
-   # Generate Prisma client
-   npm run db:generate
-   
-   # Push schema to database
-   npm run db:push
-   
-   # Seed with sample data
-   npm run db:seed
-   ```
-
-4. **Start development server**
+4. **Start Development**
    ```bash
    npm run dev
    ```
 
-5. **Open in browser**
-   - Navigate to `http://localhost:3000`
-   - Login with: `owner@catstock.com` / `admin123`
+## 🏗️ Tech Stack
 
-## 📱 iPad Optimization
+### Frontend
+- **Next.js 14** - React framework dengan App Router
+- **React 18** - UI library dengan hooks
+- **Tailwind CSS** - Utility-first CSS framework
+- **Lucide React** - Icon library
 
-### Target Device
-- **Primary**: iPad Pro 11-inch (M2) in Safari
-- **Secondary**: Desktop and mobile (responsive)
+### Backend
+- **Next.js API Routes** - Serverless API
+- **Prisma** - Database ORM
+- **SQLite** - Lightweight database
+- **JWT** - Authentication tokens
 
-### UI Guidelines
-- **Touch Targets**: Minimum 44px for all interactive elements
-- **Typography**: Base font size 16px+ for readability
-- **Navigation**: 
-  - Landscape: Collapsible sidebar with icons and labels
-  - Portrait: Bottom tab navigation
-- **Layout**: Master-detail pattern for products and transactions
-- **Forms**: Large inputs, clear labels, quantity steppers
-- **Tables**: Sticky headers, essential columns, expandable rows
+### Development
+- **Jest** - Testing framework
+- **ESLint** - Code linting
+- **Prettier** - Code formatting
 
-### Performance Features
-- Server-side pagination for large datasets
-- Optimized Prisma queries with select statements
-- Minimal client-side JavaScript
-- Safe caching with proper invalidation
-- Fast loading on iPad Safari
-
-## 🗂 Project Structure
+## 📁 Struktur Proyek
 
 ```
 catstock/
 ├── app/                    # Next.js App Router
 │   ├── api/               # API routes
 │   ├── dashboard/         # Dashboard pages
-│   ├── login/            # Authentication
-│   ├── globals.css       # Global styles
-│   ├── layout.js         # Root layout
-│   └── page.js           # Home page
+│   ├── products/          # Product management
+│   ├── suppliers/         # Supplier management
+│   ├── transactions/      # Transaction pages
+│   ├── reports/           # Reports & analytics
+│   └── tutorial/          # Interactive tutorial
 ├── components/            # React components
-├── lib/                  # Utilities and configurations
-│   ├── auth.js           # NextAuth configuration
-│   ├── prisma.js         # Prisma client
-│   └── utils.js          # Helper functions
-├── prisma/               # Database schema and migrations
-│   ├── schema.prisma     # Database schema
-│   └── seed.js           # Database seeding
-├── middleware.js         # Route protection
-└── tailwind.config.js    # Tailwind configuration
+│   ├── dashboard/         # Dashboard components
+│   ├── layout/           # Layout components
+│   ├── products/         # Product components
+│   ├── transactions/     # Transaction components
+│   └── ui/               # UI components
+├── lib/                  # Utilities & configurations
+│   ├── actions/          # Server actions
+│   ├── queries/          # Database queries
+│   ├── utils/            # Utility functions
+│   └── validations/      # Form validations
+├── prisma/               # Database schema & migrations
+└── __tests__/            # Test files
 ```
 
-## 🔐 Security Features
-
-- **Authentication**: Secure session management with httpOnly cookies
-- **Input Validation**: Server-side validation with Zod schemas
-- **CSRF Protection**: Built-in NextAuth CSRF protection
-- **Rate Limiting**: Login attempt limiting
-- **SQL Injection Prevention**: Prisma ORM protection
-- **XSS Prevention**: Proper content escaping
-- **Security Headers**: CSP, frame-ancestors, referrer-policy
-
-## 📊 Database Schema
-
-### Core Models
-- **User**: Store owner authentication
-- **Product**: Inventory items with SKU, pricing, stock levels
-- **Supplier**: Vendor information and contacts
-- **StockTransaction**: All inventory movements
-- **TransactionItem**: Individual items in transactions
-- **StockMovement**: Historical stock level tracking
-
-### Transaction Types
-- `IN`: Stock incoming (purchases)
-- `OUT`: Stock outgoing (sales)
-- `ADJUST`: Stock adjustments (inventory counts)
-- `RETURN_IN`: Returns from customers
-- `RETURN_OUT`: Returns to suppliers
-
-## 🛠 Development Commands
+## 🧪 Testing
 
 ```bash
-# Development
-npm run dev              # Start development server
-npm run build           # Build for production
-npm run start           # Start production server
+# Run all tests
+npm test
 
-# Database
-npm run db:generate     # Generate Prisma client
-npm run db:push         # Push schema changes
-npm run db:seed         # Seed database with sample data
-npm run db:studio       # Open Prisma Studio
-npm run db:reset        # Reset database (destructive)
+# Run tests in watch mode
+npm run test:watch
 
-# Utilities
-npm run lint            # Run ESLint
+# Run tests with coverage
+npm run test:coverage
 ```
 
-## 🚀 Production Deployment
+## 📚 Documentation
 
-### Environment Setup
-1. **Database**: Switch to PostgreSQL
-   ```env
-   DATABASE_URL="postgresql://username:password@localhost:5432/catstock"
-   ```
+- **[Tutorial Penggunaan](TUTORIAL_PENGGUNAAN.md)** - Panduan lengkap pengguna
+- **[Development Setup](DEVELOPMENT_SETUP.md)** - Setup untuk developer
+- **[API Documentation](docs/api.md)** - API reference
+- **[Component Guide](docs/components.md)** - Component documentation
 
-2. **Security**: Update secrets
-   ```env
-   NEXTAUTH_SECRET="secure-random-string-for-production"
-   NEXTAUTH_URL="https://your-domain.com"
-   ```
+## 🤝 Contributing
 
-3. **Build and Deploy**
-   ```bash
-   npm run build
-   npm run start
-   ```
+Kontribusi sangat diterima! Silakan:
 
-### Deployment Checklist
-- [ ] Update environment variables
-- [ ] Configure PostgreSQL database
-- [ ] Set up SSL certificates
-- [ ] Configure security headers
-- [ ] Test on actual iPad Pro 11"
-- [ ] Verify touch interactions
-- [ ] Test offline behavior
-- [ ] Monitor performance metrics
+1. Fork repository ini
+2. Buat feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit perubahan (`git commit -m 'Add some AmazingFeature'`)
+4. Push ke branch (`git push origin feature/AmazingFeature`)
+5. Buat Pull Request
 
-## 📋 iPad UI Compliance Checklist
+## 📝 License
 
-- [ ] All buttons minimum 44px touch targets
-- [ ] Font size 16px+ throughout application
-- [ ] Sidebar navigation in landscape mode
-- [ ] Bottom navigation in portrait mode
-- [ ] Master-detail split views for products/transactions
-- [ ] Quantity steppers for numeric inputs
-- [ ] Drawer/sheet components instead of modals
-- [ ] Sticky table headers with essential columns
-- [ ] No double-scroll issues in Safari
-- [ ] Touch feedback animations
-- [ ] Proper safe area handling
+Distributed under the MIT License. See `LICENSE` for more information.
 
-## 🔧 Troubleshooting
+## 👨‍💻 Author
 
-### Common Issues
+**DaffaHM**
+- GitHub: [@DaffaHM](https://github.com/DaffaHM)
+- Repository: [catstock](https://github.com/DaffaHM/catstock)
 
-1. **Database Connection**
-   ```bash
-   # Reset database if corrupted
-   npm run db:reset
-   npm run db:seed
-   ```
+## 🙏 Acknowledgments
 
-2. **Authentication Issues**
-   ```bash
-   # Clear browser cookies and restart
-   # Check NEXTAUTH_SECRET is set
-   ```
+- [Next.js](https://nextjs.org/) - The React Framework
+- [Prisma](https://prisma.io/) - Next-generation ORM
+- [Tailwind CSS](https://tailwindcss.com/) - Utility-first CSS
+- [Lucide](https://lucide.dev/) - Beautiful icons
 
-3. **iPad Safari Issues**
-   - Ensure viewport meta tag is correct
-   - Check for double-scroll containers
-   - Verify touch targets are 44px minimum
+---
 
-### Performance Optimization
-- Use React DevTools Profiler
-- Monitor Prisma query performance
-- Check bundle size with `npm run build`
-- Test on actual iPad hardware
+<div align="center">
 
-## 📄 License
+**⭐ Jika project ini membantu, berikan star di GitHub! ⭐**
 
-This project is private and proprietary.
+Made with ❤️ for Indonesian paint store owners
 
-## 🤝 Support
-
-For support and questions, please contact the development team.
+</div>
