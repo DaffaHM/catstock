@@ -11,7 +11,9 @@ import {
   BarChart3Icon,
   SlidersIcon,
   RotateCcwIcon,
-  FolderIcon
+  FolderIcon,
+  DollarSignIcon,
+  BellIcon
 } from 'lucide-react'
 import LogoutButton from '../LogoutButton'
 import Logo, { CompactLogo } from '../ui/Logo'
@@ -26,6 +28,8 @@ const navigationItems = [
   { name: 'Penyesuaian Stok', href: '/transactions/stock-adjustment', icon: SlidersIcon },
   { name: 'Retur', href: '/transactions/returns', icon: RotateCcwIcon },
   { name: 'Laporan', href: '/reports', icon: BarChart3Icon },
+  { name: 'Analisis Keuntungan', href: '/profit-analysis', icon: DollarSignIcon },
+  { name: 'Notifikasi', href: '/notifications', icon: BellIcon },
   { name: 'Pengaturan', href: '/settings', icon: SettingsIcon },
 ]
 
@@ -98,6 +102,9 @@ export default function SimpleNavLayout({ children }) {
           <div className="flex items-center justify-between">
             <CompactLogo />
             <div className="flex items-center space-x-2">
+              <a href="/notifications" className="p-2 rounded-lg hover:bg-gray-100 transition-colors" aria-label="Notifikasi">
+                <BellIcon className="h-5 w-5 text-gray-600" />
+              </a>
               <a href="/tutorial" className="p-2 rounded-lg hover:bg-gray-100 transition-colors" aria-label="Tutorial">
                 <svg className="h-5 w-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -108,6 +115,9 @@ export default function SimpleNavLayout({ children }) {
               </a>
               <a href="/suppliers" className="p-2 rounded-lg hover:bg-gray-100 transition-colors" aria-label="Pemasok">
                 <TruckIcon className="h-5 w-5 text-gray-600" />
+              </a>
+              <a href="/profit-analysis" className="p-2 rounded-lg hover:bg-gray-100 transition-colors" aria-label="Analisis Keuntungan">
+                <DollarSignIcon className="h-5 w-5 text-gray-600" />
               </a>
               <a href="/reports" className="p-2 rounded-lg hover:bg-gray-100 transition-colors" aria-label="Laporan">
                 <BarChart3Icon className="h-5 w-5 text-gray-600" />
@@ -140,7 +150,9 @@ export default function SimpleNavLayout({ children }) {
                 >
                   <Icon className={`h-5 w-5 mb-1 ${isActive ? 'text-blue-600' : 'text-gray-400'}`} />
                   <span className={`text-xs font-medium ${isActive ? 'text-blue-600' : 'text-gray-400'}`}>
-                    {item.name === 'Penyesuaian Stok' ? 'Sesuaikan' : item.name}
+                    {item.name === 'Penyesuaian Stok' ? 'Sesuaikan' : 
+                     item.name === 'Analisis Keuntungan' ? 'Keuntungan' : 
+                     item.name}
                   </span>
                 </a>
               )
