@@ -7,6 +7,12 @@ const nextConfig = {
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production'
   },
+  // Output configuration for Vercel
+  output: 'standalone',
+  // Skip build-time static generation for pages that require auth
+  generateBuildId: async () => {
+    return 'catstock-build-' + Date.now()
+  },
   // Security headers
   async headers() {
     return [

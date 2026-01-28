@@ -1,0 +1,46 @@
+# Development files
+.env.local
+.env.development
+.env.test
+
+# Test files
+__tests__/
+*.test.js
+*.spec.js
+
+# Debug and development pages
+app/test-*/
+app/debug-*/
+app/bypass-*/
+app/manual-*/
+app/force-*/
+app/direct-*/
+app/final-*/
+app/working-*/
+app/simple-*/
+app/comprehensive-*/
+app/nav-*/
+app/session-*/
+app/diagnostic/
+
+# Documentation files
+*.md
+!README.md
+
+# IDE files
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Coverage
+coverage/
+
+# Build cache
+.next/cache/
