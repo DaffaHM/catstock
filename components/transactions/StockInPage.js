@@ -4,8 +4,8 @@ import { useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import SplitView from '@/components/layout/SplitView'
 import TransactionCart from '@/components/ui/TransactionCart'
-import ProductAutocomplete from '@/components/ui/ProductAutocomplete'
-import SupplierSelect from '@/components/ui/SupplierSelect'
+import ProductDropdown from '@/components/ui/ProductDropdown'
+import SupplierDropdown from '@/components/ui/SupplierDropdown'
 import DatePicker from '@/components/ui/DatePicker'
 import TouchButton from '@/components/ui/TouchButton'
 import TouchInput from '@/components/ui/TouchInput'
@@ -19,9 +19,10 @@ import {
   CheckCircleIcon
 } from 'lucide-react'
 import { createTransaction } from '@/lib/actions/transactions'
+import { createDemoTransaction } from '@/lib/utils/demo-transactions'
 import { TransactionType } from '@/lib/validations/transaction'
 
-export default function StockInPage() {
+export default function StockInPage({ isDemoMode = false }) {
   const router = useRouter()
   
   // Form state
@@ -184,11 +185,19 @@ export default function StockInPage() {
         items: items.map(item => ({
           productId: item.productId,
           quantity: item.quantity,
-          unitCost: item.unitCost
+          unitCost: item.unitCost,
+          product: item.product // Include product details for demo mode
         }))
       }
 
-      const result = await createTransaction(transactionData)
+      let result
+      if (isDemoMode) {
+        // Use demo transaction creation
+        result = createDemoTransaction(transactionData)
+      } else {
+        // Use server action
+        result = await createTransaction(transactionData)
+      }
 
       if (result.success) {
         setSuccessMessage(`Stock in transaction created successfully! Reference: ${result.data.referenceNumber}`)
@@ -298,13 +307,14 @@ export default function StockInPage() {
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Supplier <span className="text-red-500">*</span>
                   </label>
-                  <SupplierSelect
+                  <SupplierDropdown
                     value={supplier}
                     onSupplierSelect={handleSupplierSelect}
-                    placeholder="Search and select supplier..."
+                    placeholder="Pilih pemasok..."
                     required
                     error={errors.supplier}
                     disabled={isLoading}
+                    isDemoMode={isDemoMode}
                   />
                 </div>
 
@@ -346,14 +356,15 @@ export default function StockInPage() {
                 {!showAddProduct && (
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Search Products
+                      Pilih Produk
                     </label>
-                    <ProductAutocomplete
+                    <ProductDropdown
                       onProductSelect={handleProductSelect}
-                      placeholder="Search products to add..."
+                      placeholder="Pilih produk untuk ditambahkan..."
                       disabled={isLoading}
                       excludeProductIds={excludeProductIds}
                       showStock={true}
+                      isDemoMode={isDemoMode}
                     />
                   </div>
                 )}
@@ -400,7 +411,7 @@ export default function StockInPage() {
                           min="0"
                           value={tempUnitCost}
                           onChange={(e) => setTempUnitCost(e.target.value)}
-                          placeholder="0.00"
+                          placeholder="0"
                           required
                           error={errors.unitCost}
                           disabled={isLoading}

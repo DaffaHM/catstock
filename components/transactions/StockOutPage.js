@@ -4,7 +4,7 @@ import { useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import SplitView from '@/components/layout/SplitView'
 import TransactionCart from '@/components/ui/TransactionCart'
-import ProductAutocomplete from '@/components/ui/ProductAutocomplete'
+import ProductDropdown from '@/components/ui/ProductDropdown'
 import DatePicker from '@/components/ui/DatePicker'
 import TouchButton from '@/components/ui/TouchButton'
 import TouchInput from '@/components/ui/TouchInput'
@@ -20,8 +20,10 @@ import {
 import { createTransaction } from '@/lib/actions/transactions'
 import { TransactionType } from '@/lib/validations/transaction'
 import { StockCalculationEngine } from '@/lib/engines/stock-calculation'
+import { getDemoProducts } from '@/lib/utils/demo-products'
+import { createDemoTransaction } from '@/lib/utils/demo-transactions'
 
-export default function StockOutPage() {
+export default function StockOutPage({ isDemoMode = false }) {
   const router = useRouter()
   
   // Form state
@@ -51,7 +53,18 @@ export default function StockOutPage() {
   // Validate stock availability for a product
   const validateProductStock = async (productId, requestedQuantity) => {
     try {
-      const currentStock = await StockCalculationEngine.getCurrentStock(productId)
+      let currentStock = 0
+      
+      if (isDemoMode) {
+        // Use demo data for stock validation
+        const demoProducts = getDemoProducts()
+        const product = demoProducts.find(p => p.id === productId)
+        currentStock = product ? (product.currentStock || 0) : 0
+      } else {
+        // Use database for real mode
+        currentStock = await StockCalculationEngine.getCurrentStock(productId)
+      }
+      
       const isValid = currentStock >= requestedQuantity
       
       setStockValidation(prev => ({
@@ -262,11 +275,20 @@ export default function StockOutPage() {
         items: items.map(item => ({
           productId: item.productId,
           quantity: item.quantity,
-          unitPrice: item.unitPrice
+          unitPrice: item.unitPrice,
+          product: item.product // Include product details for demo mode
         }))
       }
 
-      const result = await createTransaction(transactionData)
+      let result
+      
+      if (isDemoMode) {
+        // Use demo transaction creation
+        result = createDemoTransaction(transactionData)
+      } else {
+        // Use real transaction creation
+        result = await createTransaction(transactionData)
+      }
 
       if (result.success) {
         setSuccessMessage(`Stock out transaction created successfully! Reference: ${result.data.referenceNumber}`)
@@ -387,14 +409,15 @@ export default function StockOutPage() {
                 {!showAddProduct && (
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Search Products
+                      Pilih Produk
                     </label>
-                    <ProductAutocomplete
+                    <ProductDropdown
                       onProductSelect={handleProductSelect}
-                      placeholder="Search products to sell..."
+                      placeholder="Pilih produk untuk dijual..."
                       disabled={isLoading}
                       excludeProductIds={excludeProductIds}
                       showStock={true}
+                      isDemoMode={isDemoMode}
                     />
                   </div>
                 )}
@@ -479,7 +502,7 @@ export default function StockOutPage() {
                           min="0"
                           value={tempUnitPrice}
                           onChange={(e) => setTempUnitPrice(e.target.value)}
-                          placeholder="0.00"
+                          placeholder="0"
                           required
                           error={errors.unitPrice}
                           disabled={isLoading}

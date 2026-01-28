@@ -4,7 +4,7 @@ import { useState, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import SplitView from '@/components/layout/SplitView'
 import TransactionCart from '@/components/ui/TransactionCart'
-import ProductAutocomplete from '@/components/ui/ProductAutocomplete'
+import ProductDropdown from '@/components/ui/ProductDropdown'
 import DatePicker from '@/components/ui/DatePicker'
 import TouchButton from '@/components/ui/TouchButton'
 import TouchInput from '@/components/ui/TouchInput'
@@ -25,7 +25,7 @@ import { createTransaction } from '@/lib/actions/transactions'
 import { TransactionType } from '@/lib/validations/transaction'
 import { StockCalculationEngine } from '@/lib/engines/stock-calculation'
 
-export default function StockAdjustmentPage() {
+export default function StockAdjustmentPage({ isDemoMode = false }) {
   const router = useRouter()
   
   // Form state
@@ -413,14 +413,15 @@ export default function StockAdjustmentPage() {
                 {!showAddProduct && (
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Search Products to Adjust
+                      Pilih Produk untuk Disesuaikan
                     </label>
-                    <ProductAutocomplete
+                    <ProductDropdown
                       onProductSelect={handleProductSelect}
-                      placeholder="Search products for stock adjustment..."
+                      placeholder="Pilih produk untuk penyesuaian stok..."
                       disabled={isLoading}
                       excludeProductIds={excludeProductIds}
                       showStock={true}
+                      isDemoMode={isDemoMode}
                     />
                   </div>
                 )}

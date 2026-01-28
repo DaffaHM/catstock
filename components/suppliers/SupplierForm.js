@@ -7,7 +7,7 @@ import TouchInput from '@/components/ui/TouchInput'
 import TouchButton from '@/components/ui/TouchButton'
 import { XIcon, SaveIcon, TruckIcon } from 'lucide-react'
 
-export default function SupplierForm({ supplier, onSuccess, onCancel }) {
+export default function SupplierForm({ supplier, onSuccess, onCancel, isDemoMode }) {
   const isEditing = !!supplier
   const formRef = useRef(null)
   
@@ -27,10 +27,15 @@ export default function SupplierForm({ supplier, onSuccess, onCancel }) {
     contact: supplier?.contact || '',
     notes: supplier?.notes || ''
   })
+  
+  // Local state for demo mode
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [localError, setLocalError] = useState(null)
 
   // Handle successful form submission
   useEffect(() => {
     if (state?.success) {
+      console.log('SupplierForm: Success state received:', state.supplier)
       onSuccess(state.supplier)
     }
   }, [state?.success, state?.supplier, onSuccess])
@@ -53,7 +58,52 @@ export default function SupplierForm({ supplier, onSuccess, onCancel }) {
 
   const handleInputChange = (name, value) => {
     setFormData(prev => ({ ...prev, [name]: value }))
+    setLocalError(null) // Clear local error when user types
   }
+  
+  // Handle demo mode form submission
+  const handleDemoSubmit = async (e) => {
+    e.preventDefault()
+    
+    if (isSubmitting) return
+    
+    setIsSubmitting(true)
+    setLocalError(null)
+    
+    try {
+      // Basic validation
+      if (!formData.name.trim()) {
+        setLocalError('Nama pemasok harus diisi')
+        return
+      }
+      
+      // Create new supplier object
+      const newSupplier = {
+        id: isEditing ? supplier.id : `demo-supp-${Date.now()}`,
+        name: formData.name.trim(),
+        contact: formData.contact.trim() || null,
+        notes: formData.notes.trim() || null,
+        transactionCount: isEditing ? supplier.transactionCount : 0,
+        createdAt: isEditing ? supplier.createdAt : new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      }
+      
+      console.log('Demo form submission:', newSupplier)
+      
+      // Simulate a small delay
+      await new Promise(resolve => setTimeout(resolve, 300))
+      
+      onSuccess(newSupplier)
+    } catch (error) {
+      console.error('Demo form error:', error)
+      setLocalError('Terjadi kesalahan saat menyimpan data')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+  
+  // Choose submit handler based on mode
+  const handleSubmit = isDemoMode ? handleDemoSubmit : () => formRef.current?.requestSubmit()
 
   return (
     <div className="h-full bg-white flex flex-col">
@@ -88,11 +138,11 @@ export default function SupplierForm({ supplier, onSuccess, onCancel }) {
 
       {/* Form */}
       <div className="flex-1 overflow-y-auto p-6">
-        <form ref={formRef} action={action} className="space-y-6 max-w-2xl">
+        <form ref={formRef} action={isDemoMode ? undefined : action} onSubmit={isDemoMode ? handleDemoSubmit : undefined} className="space-y-6 max-w-2xl">
           {/* Global Error */}
-          {state?.error && (
+          {(state?.error || localError) && (
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-              <p className="font-medium">{state.error}</p>
+              <p className="font-medium">{state?.error || localError}</p>
             </div>
           )}
 
@@ -181,11 +231,12 @@ export default function SupplierForm({ supplier, onSuccess, onCancel }) {
           
           <TouchButton
             variant="primary"
-            onClick={() => formRef.current?.requestSubmit()}
+            onClick={handleSubmit}
+            disabled={isSubmitting}
             className="flex items-center"
           >
             <SaveIcon className="h-5 w-5 mr-2" />
-            {isEditing ? 'Update Supplier' : 'Create Supplier'}
+            {isSubmitting ? 'Menyimpan...' : (isEditing ? 'Update Supplier' : 'Create Supplier')}
           </TouchButton>
         </div>
       </div>

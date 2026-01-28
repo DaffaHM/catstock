@@ -53,5 +53,11 @@ export default async function StockOutTransactionPage() {
     )
   }
 
-  return <StockOutPage />
+  // Determine if we're in demo mode
+  const isDemoMode = session?.isAuthenticated && (
+    session?.user?.email === 'demo@catstock.com' || 
+    session?.user?.email === 'owner@catstock.com'
+  )
+
+  return <StockOutPage isDemoMode={isDemoMode} />
 }

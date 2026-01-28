@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { UploadIcon, DownloadIcon, SaveIcon, XIcon } from 'lucide-react'
+import { formatRupiah } from '@/lib/utils/currency'
 import TouchButton from '@/components/ui/TouchButton'
 import TouchInput from '@/components/ui/TouchInput'
 
@@ -315,7 +316,7 @@ export default function BulkPriceUpdate({ products = [], onClose, onSuccess }) {
                       <div className="text-sm text-gray-500">{update.productId}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      ${update.currentPurchasePrice.toLocaleString()}
+                      {formatRupiah(update.currentPurchasePrice)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <input
@@ -328,7 +329,7 @@ export default function BulkPriceUpdate({ products = [], onClose, onSuccess }) {
                       />
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      ${update.currentSellingPrice.toLocaleString()}
+                      {formatRupiah(update.currentSellingPrice)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <input

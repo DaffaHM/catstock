@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { getProfitAnalysisAction, getProfitByCategoryAction, getMonthlyProfitTrendAction } from '@/lib/actions/profit-analysis'
+import { getDemoProfitData } from '@/lib/utils/demo-dashboard'
 import ProfitSummaryCards from './ProfitSummaryCards'
 import ProfitProductTable from './ProfitProductTable'
 import ProfitCategoryChart from './ProfitCategoryChart'
@@ -22,57 +22,121 @@ export default function ProfitAnalysisPage() {
     sortOrder: 'desc'
   })
 
-  // Load profit analysis data
+  // Force use localStorage data - no server actions
   const loadProfitData = async () => {
     try {
       setLoading(true)
-      const result = await getProfitAnalysisAction(filters)
+      setError(null)
       
-      if (result.success) {
-        setProfitData(result)
-        setError(null)
-      } else {
-        setError(result.error)
+      console.log('[Profit Analysis] FORCED localStorage data loading')
+      
+      // Always use localStorage data - no demo mode check needed
+      const demoProfitData = getDemoProfitData()
+      console.log('[Profit Analysis] Raw profit data:', demoProfitData)
+      
+      if (!demoProfitData || !demoProfitData.profitByProduct) {
+        console.error('[Profit Analysis] No profit data available')
+        setError('Tidak ada data keuntungan tersedia')
+        setLoading(false)
+        return
       }
+      
+      // Apply filters to demo data
+      let filteredProducts = [...demoProfitData.profitByProduct]
+      
+      if (filters.search) {
+        const searchLower = filters.search.toLowerCase()
+        filteredProducts = filteredProducts.filter(item =>
+          item.name.toLowerCase().includes(searchLower) ||
+          item.brand.toLowerCase().includes(searchLower) ||
+          item.sku.toLowerCase().includes(searchLower)
+        )
+      }
+      
+      if (filters.category) {
+        filteredProducts = filteredProducts.filter(item => item.category === filters.category)
+      }
+      
+      // Sort data
+      filteredProducts.sort((a, b) => {
+        const aVal = a[filters.sortBy] || 0
+        const bVal = b[filters.sortBy] || 0
+        if (filters.sortOrder === 'desc') {
+          return bVal - aVal
+        }
+        return aVal - bVal
+      })
+      
+      // Calculate summary
+      const summary = {
+        totalProducts: filteredProducts.length,
+        totalProfitAmount: filteredProducts.reduce((sum, item) => sum + (item.totalProfit || 0), 0),
+        averageProfitPercentage: filteredProducts.length > 0 ? 
+          filteredProducts.reduce((sum, item) => sum + (item.profitPercentage || 0), 0) / filteredProducts.length : 0,
+        totalItemsSold: filteredProducts.reduce((sum, item) => sum + (item.totalSold || 0), 0),
+        highestProfitProduct: filteredProducts.length > 0 ? 
+          filteredProducts.reduce((max, item) => 
+            (item.profitPercentage || 0) > (max.profitPercentage || 0) ? item : max, filteredProducts[0]
+          ) : null,
+        lowestProfitProduct: filteredProducts.length > 0 ? 
+          filteredProducts.reduce((min, item) => 
+            (item.profitPercentage || 0) < (min.profitPercentage || 0) ? item : min, filteredProducts[0]
+          ) : null
+      }
+      
+      console.log('[Profit Analysis] Processed data:', { 
+        products: filteredProducts.length, 
+        summary,
+        totalProfit: summary.totalProfitAmount 
+      })
+      
+      setProfitData({
+        success: true,
+        products: filteredProducts,
+        summary
+      })
+      
+      // Set category data
+      setCategoryData({
+        success: true,
+        categories: demoProfitData.profitByCategory || []
+      })
+      
+      // Set trend data
+      setTrendData({
+        success: true,
+        monthlyData: demoProfitData.monthlyProfit || []
+      })
+      
     } catch (err) {
       console.error('Error loading profit data:', err)
-      setError('Terjadi kesalahan saat memuat data keuntungan')
+      setError('Terjadi kesalahan saat memuat data keuntungan: ' + err.message)
     } finally {
       setLoading(false)
     }
   }
 
-  // Load category data
-  const loadCategoryData = async () => {
-    try {
-      const result = await getProfitByCategoryAction()
-      if (result.success) {
-        setCategoryData(result)
-      }
-    } catch (err) {
-      console.error('Error loading category data:', err)
-    }
-  }
-
-  // Load trend data
-  const loadTrendData = async () => {
-    try {
-      const result = await getMonthlyProfitTrendAction(6)
-      if (result.success) {
-        setTrendData(result)
-      }
-    } catch (err) {
-      console.error('Error loading trend data:', err)
-    }
-  }
-
   useEffect(() => {
+    console.log('[Profit Analysis] Component mounted, loading data')
     loadProfitData()
-    loadCategoryData()
-    loadTrendData()
+    
+    // Listen for data changes
+    const handleDataUpdate = () => {
+      console.log('[Profit Analysis] Data updated, refreshing')
+      loadProfitData()
+    }
+
+    window.addEventListener('transactionsUpdated', handleDataUpdate)
+    window.addEventListener('productsUpdated', handleDataUpdate)
+    
+    return () => {
+      window.removeEventListener('transactionsUpdated', handleDataUpdate)
+      window.removeEventListener('productsUpdated', handleDataUpdate)
+    }
   }, [])
 
   useEffect(() => {
+    console.log('[Profit Analysis] Filters changed, reloading data')
     loadProfitData()
   }, [filters])
 
@@ -92,7 +156,7 @@ export default function ProfitAnalysisPage() {
       <div className="flex items-center justify-center py-12">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Memuat analisis keuntungan...</p>
+          <p className="text-gray-600">Memuat analisis keuntungan dari localStorage...</p>
         </div>
       </div>
     )
@@ -120,6 +184,19 @@ export default function ProfitAnalysisPage() {
 
   return (
     <div className="space-y-6">
+      {/* LocalStorage Data Indicator */}
+      <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+        <div className="flex items-center">
+          <TrendingUpIcon className="h-5 w-5 text-green-500 mr-3" />
+          <div>
+            <h3 className="text-green-800 font-medium">Data Tersinkronisasi dari localStorage</h3>
+            <p className="text-green-600 text-sm mt-1">
+              Data keuntungan dihitung real-time dari transaksi dan produk yang tersimpan di localStorage
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* Summary Cards */}
       {profitData?.summary && (
         <ProfitSummaryCards summary={profitData.summary} />
@@ -185,6 +262,11 @@ export default function ProfitAnalysisPage() {
             />
           </div>
         )}
+      </div>
+
+      {/* Debug Info */}
+      <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 text-xs">
+        <p><strong>Debug:</strong> Products: {profitData?.products?.length || 0}, Total Profit: {profitData?.summary?.totalProfitAmount || 0}</p>
       </div>
     </div>
   )

@@ -5,8 +5,8 @@ import { formatRupiah } from '@/lib/utils/currency'
 export default function DashboardStats({ stats }) {
   if (!stats) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        {[...Array(4)].map((_, i) => (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+        {[...Array(5)].map((_, i) => (
           <div key={i} className="bg-white rounded-lg shadow p-6">
             <div className="animate-pulse">
               <div className="h-4 bg-gray-200 rounded w-24 mb-2"></div>
@@ -42,11 +42,17 @@ export default function DashboardStats({ stats }) {
       value: formatRupiah(stats.totalValue),
       icon: '💰',
       color: 'yellow'
+    },
+    {
+      title: 'Total Keuntungan',
+      value: formatRupiah(stats.totalProfit || 0),
+      icon: '💎',
+      color: 'emerald'
     }
   ]
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
       {statCards.map((card, index) => (
         <div key={index} className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center justify-between">

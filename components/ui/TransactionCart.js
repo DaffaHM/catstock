@@ -116,10 +116,11 @@ export default function TransactionCart({
   }
 
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('id-ID', {
       style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 2
+      currency: 'IDR',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
     }).format(amount)
   }
 
@@ -297,10 +298,11 @@ function TransactionCartItem({
   }
 
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('id-ID', {
       style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 2
+      currency: 'IDR',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
     }).format(amount || 0)
   }
 
@@ -386,7 +388,7 @@ function TransactionCartItem({
                 onChange={(e) => onPriceChange(item.id, 'unitCost', e.target.value)}
                 disabled={disabled}
                 className="w-full h-12 px-3 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent touch-manipulation"
-                placeholder="0.00"
+                placeholder="0"
               />
             </div>
           )}
@@ -405,7 +407,7 @@ function TransactionCartItem({
                 onChange={(e) => onPriceChange(item.id, 'unitPrice', e.target.value)}
                 disabled={disabled}
                 className="w-full h-12 px-3 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent touch-manipulation"
-                placeholder="0.00"
+                placeholder="0"
               />
             </div>
           )}

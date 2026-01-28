@@ -4,7 +4,7 @@ import { useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import SplitView from '@/components/layout/SplitView'
 import TransactionCart from '@/components/ui/TransactionCart'
-import ProductAutocomplete from '@/components/ui/ProductAutocomplete'
+import ProductDropdown from '@/components/ui/ProductDropdown'
 import DatePicker from '@/components/ui/DatePicker'
 import TouchButton from '@/components/ui/TouchButton'
 import TouchInput from '@/components/ui/TouchInput'
@@ -20,7 +20,7 @@ import {
 import { createTransaction } from '@/lib/actions/transactions'
 import { TransactionType } from '@/lib/validations/transaction'
 
-export default function ReturnsPage() {
+export default function ReturnsPage({ isDemoMode = false }) {
   const router = useRouter()
   
   // Form state
@@ -369,14 +369,15 @@ export default function ReturnsPage() {
                 {!showAddProduct && (
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Search Products
+                      Pilih Produk
                     </label>
-                    <ProductAutocomplete
+                    <ProductDropdown
                       onProductSelect={handleProductSelect}
-                      placeholder="Search products to return..."
+                      placeholder="Pilih produk untuk dikembalikan..."
                       disabled={isLoading}
                       excludeProductIds={excludeProductIds}
                       showStock={true}
+                      isDemoMode={isDemoMode}
                     />
                   </div>
                 )}
@@ -423,7 +424,7 @@ export default function ReturnsPage() {
                           min="0"
                           value={tempUnitPrice}
                           onChange={(e) => setTempUnitPrice(e.target.value)}
-                          placeholder="0.00"
+                          placeholder="0"
                           required={returnType === 'RETURN_OUT'}
                           error={errors.unitPrice}
                           disabled={isLoading}

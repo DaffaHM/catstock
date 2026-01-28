@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Line } from 'react-chartjs-2'
+import { formatRupiah } from '@/lib/utils/currency'
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -46,7 +47,7 @@ export default function PriceHistoryChart({ productId, days = 30 }) {
         setError(data.error)
       }
     } catch (err) {
-      setError('Failed to load price history')
+      setError('Gagal memuat riwayat harga')
     } finally {
       setLoading(false)
     }
@@ -63,7 +64,7 @@ export default function PriceHistoryChart({ productId, days = 30 }) {
   if (error) {
     return (
       <div className="flex items-center justify-center h-64 text-red-600">
-        <p>{error}</p>
+        <p>Gagal memuat riwayat harga</p>
       </div>
     )
   }
@@ -71,7 +72,7 @@ export default function PriceHistoryChart({ productId, days = 30 }) {
   if (priceHistory.length === 0) {
     return (
       <div className="flex items-center justify-center h-64 text-gray-500">
-        <p>No price history available</p>
+        <p>Tidak ada riwayat harga tersedia</p>
       </div>
     )
   }
@@ -117,14 +118,14 @@ export default function PriceHistoryChart({ productId, days = 30 }) {
       },
       title: {
         display: true,
-        text: 'Price History',
+        text: 'Riwayat Harga',
       },
       tooltip: {
         mode: 'index',
         intersect: false,
         callbacks: {
           label: function(context) {
-            return `${context.dataset.label}: $${context.parsed.y.toLocaleString()}`
+            return `${context.dataset.label}: ${formatRupiah(context.parsed.y)}`
           }
         }
       }
@@ -141,11 +142,11 @@ export default function PriceHistoryChart({ productId, days = 30 }) {
         display: true,
         title: {
           display: true,
-          text: 'Price ($)'
+          text: 'Harga (Rp)'
         },
         ticks: {
           callback: function(value) {
-            return '$' + value.toLocaleString()
+            return formatRupiah(value, false)
           }
         }
       }
@@ -167,17 +168,17 @@ export default function PriceHistoryChart({ productId, days = 30 }) {
       {sortedHistory.length > 1 && (
         <div className="mt-4 grid grid-cols-2 gap-4 text-sm">
           <div className="bg-red-50 p-3 rounded">
-            <div className="font-medium text-red-800">Purchase Price Change</div>
+            <div className="font-medium text-red-800">Perubahan Harga Beli</div>
             <div className="text-red-600">
-              ${(sortedHistory[sortedHistory.length - 1].purchasePrice - sortedHistory[0].purchasePrice).toLocaleString()}
+              {formatRupiah(sortedHistory[sortedHistory.length - 1].purchasePrice - sortedHistory[0].purchasePrice)}
               {' '}
               ({((sortedHistory[sortedHistory.length - 1].purchasePrice - sortedHistory[0].purchasePrice) / sortedHistory[0].purchasePrice * 100).toFixed(1)}%)
             </div>
           </div>
           <div className="bg-green-50 p-3 rounded">
-            <div className="font-medium text-green-800">Selling Price Change</div>
+            <div className="font-medium text-green-800">Perubahan Harga Jual</div>
             <div className="text-green-600">
-              ${(sortedHistory[sortedHistory.length - 1].sellingPrice - sortedHistory[0].sellingPrice).toLocaleString()}
+              {formatRupiah(sortedHistory[sortedHistory.length - 1].sellingPrice - sortedHistory[0].sellingPrice)}
               {' '}
               ({((sortedHistory[sortedHistory.length - 1].sellingPrice - sortedHistory[0].sellingPrice) / sortedHistory[0].sellingPrice * 100).toFixed(1)}%)
             </div>

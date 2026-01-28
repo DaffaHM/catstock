@@ -53,5 +53,11 @@ export default async function StockAdjustmentRoute() {
     )
   }
 
-  return <StockAdjustmentPage />
+  // Determine if we're in demo mode
+  const isDemoMode = session?.isAuthenticated && (
+    session?.user?.email === 'demo@catstock.com' || 
+    session?.user?.email === 'owner@catstock.com'
+  )
+
+  return <StockAdjustmentPage isDemoMode={isDemoMode} />
 }

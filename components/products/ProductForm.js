@@ -3,12 +3,14 @@
 import { useState, useRef, useEffect } from 'react'
 import { useFormState } from 'react-dom'
 import { createProductAction, updateProductAction } from '@/lib/actions/products'
+import { saveDemoProduct } from '@/lib/utils/demo-products'
+import { formatRupiah } from '@/lib/utils/currency'
 import { PRODUCT_CATEGORIES, PRODUCT_UNITS } from '@/lib/validations/product'
 import TouchInput from '@/components/ui/TouchInput'
 import TouchButton from '@/components/ui/TouchButton'
 import { XIcon, SaveIcon, PackageIcon } from 'lucide-react'
 
-export default function ProductForm({ product, categories, onSuccess, onCancel }) {
+export default function ProductForm({ product, categories, onSuccess, onCancel, isDemoMode }) {
   const isEditing = !!product
   const formRef = useRef(null)
   
@@ -42,6 +44,53 @@ export default function ProductForm({ product, categories, onSuccess, onCancel }
     }
   }, [state?.success, state?.product, onSuccess])
 
+  // Handle demo mode form submission
+  const handleDemoSubmit = async (e) => {
+    e.preventDefault()
+    
+    if (isDemoMode) {
+      // Validate required fields
+      const requiredFields = ['sku', 'brand', 'name', 'category', 'size', 'unit']
+      const errors = {}
+      
+      requiredFields.forEach(field => {
+        if (!formData[field] || formData[field].trim() === '') {
+          errors[field] = `${field.charAt(0).toUpperCase() + field.slice(1)} is required`
+        }
+      })
+      
+      if (Object.keys(errors).length > 0) {
+        console.log('Validation errors:', errors)
+        return
+      }
+      
+      // Create new product for demo mode
+      const newProduct = {
+        id: isEditing ? product.id : `demo-prod-${Date.now()}`,
+        sku: formData.sku,
+        brand: formData.brand,
+        name: formData.name,
+        category: formData.category,
+        size: formData.size,
+        unit: formData.unit,
+        purchasePrice: parseFloat(formData.purchasePrice) || 0,
+        sellingPrice: parseFloat(formData.sellingPrice) || 0,
+        minimumStock: parseInt(formData.minimumStock) || 0,
+        currentStock: product?.currentStock || 0,
+        transactionCount: product?.transactionCount || 0,
+        createdAt: product?.createdAt || new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      }
+      
+      console.log('Demo product created:', newProduct)
+      onSuccess(newProduct)
+      return
+    }
+    
+    // For database mode, use regular form submission
+    formRef.current?.requestSubmit()
+  }
+
   // Auto-scroll to first error
   useEffect(() => {
     if (state?.errors && formRef.current) {
@@ -67,7 +116,7 @@ export default function ProductForm({ product, categories, onSuccess, onCancel }
     const selling = parseFloat(formData.sellingPrice) || 0
     
     if (purchase > 0 && selling > 0 && purchase > selling) {
-      return 'Purchase price should not exceed selling price'
+      return 'Harga beli tidak boleh lebih tinggi dari harga jual'
     }
     return null
   }
@@ -86,12 +135,12 @@ export default function ProductForm({ product, categories, onSuccess, onCancel }
             <PackageIcon className="h-6 w-6 text-primary-600 mr-3" />
             <div>
               <h2 className="text-2xl font-bold text-gray-900">
-                {isEditing ? 'Edit Product' : 'Create New Product'}
+                {isEditing ? 'Edit Produk' : 'Tambah Produk Baru'}
               </h2>
               <p className="text-gray-600 mt-1">
                 {isEditing 
-                  ? `Update details for ${product.name}`
-                  : 'Add a new product to your inventory'
+                  ? `Update detail untuk ${product.name}`
+                  : 'Tambahkan produk baru ke inventori Anda'
                 }
               </p>
             </div>
@@ -110,9 +159,9 @@ export default function ProductForm({ product, categories, onSuccess, onCancel }
 
       {/* Form */}
       <div className="flex-1 overflow-y-auto p-6">
-        <form ref={formRef} action={action} className="space-y-6 max-w-2xl">
+        <form ref={formRef} action={isDemoMode ? handleDemoSubmit : action} onSubmit={isDemoMode ? handleDemoSubmit : undefined} className="space-y-6 max-w-2xl">
           {/* Global Error */}
-          {state?.error && (
+          {state?.error && !isDemoMode && (
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
               <p className="font-medium">{state.error}</p>
             </div>
@@ -121,7 +170,7 @@ export default function ProductForm({ product, categories, onSuccess, onCancel }
           {/* Basic Information */}
           <div className="space-y-6">
             <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">
-              Basic Information
+              Informasi Dasar
             </h3>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -137,30 +186,30 @@ export default function ProductForm({ product, categories, onSuccess, onCancel }
               />
 
               <TouchInput
-                label="Brand"
+                label="Merek"
                 name="brand"
                 value={formData.brand}
                 onChange={(e) => handleInputChange('brand', e.target.value)}
                 error={state?.errors?.brand}
                 required
-                placeholder="e.g., Sherwin-Williams"
+                placeholder="e.g., Dulux"
               />
             </div>
 
             <TouchInput
-              label="Product Name"
+              label="Nama Produk"
               name="name"
               value={formData.name}
               onChange={(e) => handleInputChange('name', e.target.value)}
               error={state?.errors?.name}
               required
-              placeholder="e.g., Premium Interior Paint"
+              placeholder="e.g., Cat Tembok Premium"
             />
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <label className="block text-base font-medium text-gray-700">
-                  Category <span className="text-red-500">*</span>
+                  Kategori <span className="text-red-500">*</span>
                 </label>
                 <select
                   name="category"
@@ -171,7 +220,7 @@ export default function ProductForm({ product, categories, onSuccess, onCancel }
                     state?.errors?.category ? 'border-red-500' : 'border-gray-300'
                   }`}
                 >
-                  <option value="">Select a category</option>
+                  <option value="">Pilih kategori</option>
                   {allCategories.map((category) => (
                     <option key={category} value={category}>
                       {category}
@@ -185,7 +234,7 @@ export default function ProductForm({ product, categories, onSuccess, onCancel }
 
               <div className="space-y-2">
                 <label className="block text-base font-medium text-gray-700">
-                  Unit <span className="text-red-500">*</span>
+                  Satuan <span className="text-red-500">*</span>
                 </label>
                 <select
                   name="unit"
@@ -209,45 +258,45 @@ export default function ProductForm({ product, categories, onSuccess, onCancel }
             </div>
 
             <TouchInput
-              label="Size/Packaging"
+              label="Ukuran/Kemasan"
               name="size"
               value={formData.size}
               onChange={(e) => handleInputChange('size', e.target.value)}
               error={state?.errors?.size}
               required
-              placeholder="e.g., 1 Gallon, 5 Liters"
+              placeholder="e.g., 1 Galon, 5 Liter"
             />
           </div>
 
           {/* Pricing Information */}
           <div className="space-y-6">
             <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">
-              Pricing Information
+              Informasi Harga
             </h3>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <TouchInput
-                label="Purchase Price"
+                label="Harga Beli"
                 name="purchasePrice"
                 type="number"
-                step="0.01"
+                step="1000"
                 min="0"
                 value={formData.purchasePrice}
                 onChange={(e) => handleInputChange('purchasePrice', e.target.value)}
                 error={state?.errors?.purchasePrice}
-                placeholder="0.00"
+                placeholder="0"
               />
 
               <TouchInput
-                label="Selling Price"
+                label="Harga Jual"
                 name="sellingPrice"
                 type="number"
-                step="0.01"
+                step="1000"
                 min="0"
                 value={formData.sellingPrice}
                 onChange={(e) => handleInputChange('sellingPrice', e.target.value)}
                 error={state?.errors?.sellingPrice}
-                placeholder="0.00"
+                placeholder="0"
               />
             </div>
 
@@ -262,10 +311,10 @@ export default function ProductForm({ product, categories, onSuccess, onCancel }
             {formData.purchasePrice && formData.sellingPrice && !priceWarning && (
               <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-green-800">Profit Margin:</span>
+                  <span className="text-sm font-medium text-green-800">Margin Keuntungan:</span>
                   <div className="text-right">
                     <span className="text-lg font-bold text-green-900">
-                      ${(parseFloat(formData.sellingPrice) - parseFloat(formData.purchasePrice)).toFixed(2)}
+                      {formatRupiah(parseFloat(formData.sellingPrice) - parseFloat(formData.purchasePrice))}
                     </span>
                     <span className="text-sm text-green-600 ml-2">
                       ({Math.round(((parseFloat(formData.sellingPrice) - parseFloat(formData.purchasePrice)) / parseFloat(formData.purchasePrice)) * 100)}%)
@@ -279,11 +328,11 @@ export default function ProductForm({ product, categories, onSuccess, onCancel }
           {/* Inventory Settings */}
           <div className="space-y-6">
             <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">
-              Inventory Settings
+              Pengaturan Inventori
             </h3>
 
             <TouchInput
-              label="Minimum Stock Level"
+              label="Stok Minimum"
               name="minimumStock"
               type="number"
               min="0"
@@ -295,8 +344,8 @@ export default function ProductForm({ product, categories, onSuccess, onCancel }
 
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
               <p className="text-sm text-blue-700">
-                <strong>Tip:</strong> Set a minimum stock level to receive low stock alerts 
-                when inventory falls below this threshold.
+                <strong>Tips:</strong> Atur level stok minimum untuk menerima peringatan stok rendah 
+                ketika inventori turun di bawah ambang batas ini.
               </p>
             </div>
           </div>
@@ -310,16 +359,16 @@ export default function ProductForm({ product, categories, onSuccess, onCancel }
             variant="outline"
             onClick={onCancel}
           >
-            Cancel
+            Batal
           </TouchButton>
           
           <TouchButton
             variant="primary"
-            onClick={() => formRef.current?.requestSubmit()}
+            onClick={isDemoMode ? handleDemoSubmit : () => formRef.current?.requestSubmit()}
             className="flex items-center"
           >
             <SaveIcon className="h-5 w-5 mr-2" />
-            {isEditing ? 'Update Product' : 'Create Product'}
+            {isEditing ? 'Update Produk' : 'Buat Produk'}
           </TouchButton>
         </div>
       </div>
