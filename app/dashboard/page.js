@@ -9,11 +9,15 @@ export const metadata = {
 
 export default async function DashboardPage() {
   let session = null
+  let isDemoMode = false
   
   // Try quick authentication first (for demo mode)
   try {
     session = await getQuickSession()
-    console.log('[Dashboard] Quick auth result:', !!session?.isAuthenticated)
+    if (session?.isAuthenticated) {
+      isDemoMode = true
+      console.log('[Dashboard] Using demo mode with quick session')
+    }
   } catch (error) {
     console.log('[Dashboard] Quick auth failed, trying regular auth')
   }
@@ -54,5 +58,5 @@ export default async function DashboardPage() {
     )
   }
 
-  return <DashboardContent session={session} />
+  return <DashboardContent session={session} isDemoMode={isDemoMode} />
 }
