@@ -2,46 +2,58 @@ import { NextResponse } from 'next/server'
 
 const SESSION_COOKIE_NAME = 'catstock-session'
 
+// Public routes that don't require authentication
+const PUBLIC_ROUTES = [
+  '/login',
+  '/quick-login',
+  '/tutorial',
+  '/panduan-cepat',
+  '/debug-auth',
+  '/test-dashboard-fix'
+]
+
+// Routes that should be accessible for testing/debugging
+const TEST_ROUTES = [
+  '/test-',
+  '/debug-',
+  '/bypass-',
+  '/manual-',
+  '/session-',
+  '/force-',
+  '/direct-',
+  '/final-',
+  '/nav-',
+  '/simple-',
+  '/comprehensive-',
+  '/working-'
+]
+
 export async function middleware(request) {
   const { pathname } = request.nextUrl
   const method = request.method
   
   console.log(`[Middleware] ${method} ${pathname}`)
   
-  // Allow access to login page and public assets
+  // Allow static files and API routes
   if (
-    pathname === '/login' ||
-    pathname === '/simple-login' ||
-    pathname === '/quick-login' ||
-    pathname === '/direct-login' ||
-    pathname === '/final-working-test' ||
-    pathname === '/test-indonesia' ||
-    pathname === '/test-final' ||
-    pathname === '/test-complete' ||
-    pathname === '/test-dashboard-fix' ||
-    pathname === '/tutorial' ||
-    pathname === '/panduan-cepat' ||
-    pathname === '/simple-test' ||
-    pathname === '/debug-nav' ||
-    pathname === '/debug-auth' ||
-    pathname === '/comprehensive-test' ||
-    pathname === '/working-test' ||
     pathname.startsWith('/_next/') ||
     pathname.startsWith('/api/') ||
     pathname === '/favicon.ico' ||
-    pathname.startsWith('/public/') ||
-    pathname.startsWith('/diagnostic') ||
-    pathname.startsWith('/test-') ||
-    pathname.startsWith('/debug-') ||
-    pathname.startsWith('/bypass-') ||
-    pathname.startsWith('/manual-') ||
-    pathname.startsWith('/session-') ||
-    pathname.startsWith('/force-') ||
-    pathname.startsWith('/direct-') ||
-    pathname.startsWith('/final-') ||
-    pathname.startsWith('/nav-')
+    pathname.startsWith('/public/')
   ) {
-    console.log(`[Middleware] Allowing access to ${pathname}`)
+    return NextResponse.next()
+  }
+  
+  // Allow public routes
+  if (PUBLIC_ROUTES.includes(pathname)) {
+    console.log(`[Middleware] Public route allowed: ${pathname}`)
+    return NextResponse.next()
+  }
+  
+  // Allow test routes in development
+  if (process.env.NODE_ENV === 'development' && 
+      TEST_ROUTES.some(route => pathname.startsWith(route))) {
+    console.log(`[Middleware] Test route allowed: ${pathname}`)
     return NextResponse.next()
   }
   
@@ -56,7 +68,7 @@ export async function middleware(request) {
       return NextResponse.redirect(loginUrl)
     }
     
-    // Check if it's a base64 token (quick-setup) or JWT token
+    // Validate token format
     try {
       // Try to decode as base64 first (quick-setup token)
       const decoded = JSON.parse(Buffer.from(token, 'base64').toString())
@@ -74,7 +86,7 @@ export async function middleware(request) {
       return NextResponse.next()
       
     } catch (base64Error) {
-      // If base64 decode fails, try JWT validation
+      // If base64 decode fails, check JWT format
       const parts = token.split('.')
       if (parts.length !== 3 || token.length < 100) {
         console.log(`[Middleware] Invalid token format, redirecting to quick-login from ${pathname}`)

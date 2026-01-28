@@ -1,18 +1,23 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // External packages for server components
   experimental: {
     serverComponentsExternalPackages: ['@prisma/client', 'bcryptjs']
   },
-  // Optimize for iPad Safari
+  
+  // Optimize for iPad Safari and production
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production'
   },
+  
   // Output configuration for Vercel
-  output: 'standalone',
-  // Skip build-time static generation for pages that require auth
+  output: process.env.VERCEL ? undefined : 'standalone',
+  
+  // Generate unique build ID
   generateBuildId: async () => {
     return 'catstock-build-' + Date.now()
   },
+  
   // Security headers
   async headers() {
     return [
@@ -28,6 +33,87 @@ const nextConfig = {
             value: 'nosniff'
           },
           {
+            key: 'Referrer-Policy',
+            value: 'strict-origin-when-cross-origin'
+          },
+          {
+            key: 'X-XSS-Protection',
+            value: '1; mode=block'
+          },
+          {
+            key: 'Content-Security-Policy',
+            value: [
+              "default-src 'self'",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+              "style-src 'self' 'unsafe-inline'",
+              "img-src 'self' data: blob:",
+              "font-src 'self'",
+              "connect-src 'self'",
+              "frame-ancestors 'none'"
+            ].join('; ')
+          }
+        ]
+      }
+    ]
+  },
+  
+  // Redirects for better UX
+  async redirects() {
+    return [
+      {
+        source: '/',
+        destination: '/dashboard',
+        permanent: false
+      }
+    ]
+  },
+  
+  // Webpack configuration for better bundle optimization
+  webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
+    // Optimize bundle size
+    if (!dev && !isServer) {
+      config.optimization.splitChunks = {
+        chunks: 'all',
+        cacheGroups: {
+          vendor: {
+            test: /[\\/]node_modules[\\/]/,
+            name: 'vendors',
+            chunks: 'all',
+          },
+        },
+      }
+    }
+    
+    return config
+  },
+  
+  // Environment variables validation
+  env: {
+    CUSTOM_KEY: process.env.CUSTOM_KEY,
+  },
+  
+  // Image optimization
+  images: {
+    domains: [],
+    formats: ['image/webp', 'image/avif'],
+  },
+  
+  // Performance optimizations
+  poweredByHeader: false,
+  compress: true,
+  
+  // Development configuration
+  ...(process.env.NODE_ENV === 'development' && {
+    typescript: {
+      ignoreBuildErrors: false,
+    },
+    eslint: {
+      ignoreDuringBuilds: false,
+    },
+  }),
+}
+
+module.exports = nextConfig
             key: 'Referrer-Policy',
             value: 'strict-origin-when-cross-origin'
           },
