@@ -1,4 +1,5 @@
 import { getSession } from '@/lib/auth'
+import { getQuickSession } from '@/lib/auth-quick'
 import { redirect } from 'next/navigation'
 import LoginForm from '@/components/LoginForm'
 
@@ -8,7 +9,18 @@ export const metadata = {
 }
 
 export default async function LoginPage() {
-  const session = await getSession()
+  // Try both authentication methods
+  let session = null
+  
+  try {
+    session = await getQuickSession()
+  } catch (error) {
+    try {
+      session = await getSession()
+    } catch (error2) {
+      // Both failed, continue to login form
+    }
+  }
   
   // If already authenticated, redirect immediately using server-side redirect
   if (session?.isAuthenticated) {
@@ -43,6 +55,22 @@ export default async function LoginPage() {
               </p>
             </div>
             
+            {/* Demo Mode Notice */}
+            <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6">
+              <div className="flex items-start">
+                <svg className="w-5 h-5 text-blue-600 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <div>
+                  <h3 className="font-semibold text-blue-800 mb-1">Mode Demo Tersedia</h3>
+                  <p className="text-blue-700 text-sm">
+                    Sistem akan otomatis menggunakan mode demo jika database tidak tersedia.
+                    Gunakan kredensial di bawah ini untuk testing.
+                  </p>
+                </div>
+              </div>
+            </div>
+            
             <LoginForm />
           </div>
         </div>
@@ -52,8 +80,16 @@ export default async function LoginPage() {
             Dioptimalkan untuk iPad Pro 11&quot; • Antarmuka ramah sentuh
           </p>
           <p className="text-xs tablet:text-sm text-gray-400">
-            Test: owner@catstock.com / admin123
+            Demo: owner@catstock.com / admin123
           </p>
+          <div className="flex justify-center space-x-4 mt-4">
+            <a href="/quick-login" className="text-blue-600 hover:underline text-sm">
+              Quick Login (Demo)
+            </a>
+            <a href="/debug-auth" className="text-gray-500 hover:underline text-sm">
+              Debug Auth
+            </a>
+          </div>
         </div>
       </div>
     </div>

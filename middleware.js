@@ -16,6 +16,7 @@ export async function middleware(request) {
     pathname === '/direct-login' ||
     pathname === '/final-working-test' ||
     pathname === '/test-indonesia' ||
+    pathname === '/test-final' ||
     pathname === '/tutorial' ||
     pathname === '/panduan-cepat' ||
     pathname === '/simple-test' ||
@@ -48,27 +49,46 @@ export async function middleware(request) {
     console.log(`[Middleware] Token present: ${!!token}`)
     
     if (!token) {
-      console.log(`[Middleware] No token found, redirecting to login from ${pathname}`)
-      const loginUrl = new URL('/login', request.url)
+      console.log(`[Middleware] No token found, redirecting to quick-login from ${pathname}`)
+      const loginUrl = new URL('/quick-login', request.url)
       return NextResponse.redirect(loginUrl)
     }
     
-    // Basic token format validation - JWT tokens have 3 parts separated by dots
-    const parts = token.split('.')
-    if (parts.length !== 3 || token.length < 100) {
-      console.log(`[Middleware] Invalid token format, redirecting to login from ${pathname}`)
-      const loginUrl = new URL('/login', request.url)
-      const response = NextResponse.redirect(loginUrl)
-      response.cookies.delete(SESSION_COOKIE_NAME)
-      return response
+    // Check if it's a base64 token (quick-setup) or JWT token
+    try {
+      // Try to decode as base64 first (quick-setup token)
+      const decoded = JSON.parse(Buffer.from(token, 'base64').toString())
+      
+      // Check if token is expired
+      if (decoded.exp && Date.now() > decoded.exp) {
+        console.log(`[Middleware] Quick token expired, redirecting to quick-login from ${pathname}`)
+        const loginUrl = new URL('/quick-login', request.url)
+        const response = NextResponse.redirect(loginUrl)
+        response.cookies.delete(SESSION_COOKIE_NAME)
+        return response
+      }
+      
+      console.log(`[Middleware] Valid quick token for ${decoded.email}, allowing access to ${pathname}`)
+      return NextResponse.next()
+      
+    } catch (base64Error) {
+      // If base64 decode fails, try JWT validation
+      const parts = token.split('.')
+      if (parts.length !== 3 || token.length < 100) {
+        console.log(`[Middleware] Invalid token format, redirecting to quick-login from ${pathname}`)
+        const loginUrl = new URL('/quick-login', request.url)
+        const response = NextResponse.redirect(loginUrl)
+        response.cookies.delete(SESSION_COOKIE_NAME)
+        return response
+      }
+      
+      console.log(`[Middleware] JWT token format valid, allowing access to ${pathname}`)
+      return NextResponse.next()
     }
-    
-    console.log(`[Middleware] Token format valid, allowing access to ${pathname}`)
-    return NextResponse.next()
     
   } catch (error) {
     console.error(`[Middleware] Auth error for ${pathname}:`, error)
-    const loginUrl = new URL('/login', request.url)
+    const loginUrl = new URL('/quick-login', request.url)
     return NextResponse.redirect(loginUrl)
   }
 }
