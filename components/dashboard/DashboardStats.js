@@ -1,6 +1,6 @@
 'use client'
 
-import { formatCurrency } from '@/lib/utils/currency'
+import { formatRupiah } from '@/lib/utils/currency'
 
 export default function DashboardStats({ stats }) {
   if (!stats) {
@@ -39,7 +39,7 @@ export default function DashboardStats({ stats }) {
     },
     {
       title: 'Nilai Total',
-      value: formatCurrency(stats.totalValue),
+      value: formatRupiah(stats.totalValue),
       icon: '💰',
       color: 'yellow'
     }
