@@ -1,257 +1,76 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
-import SplitView from '@/components/layout/SplitView'
-import SupplierList from './SupplierList'
-import SupplierDetail from './SupplierDetail'
-import SupplierForm from './SupplierForm'
-import SupplierFilters from './SupplierFilters'
-import TouchButton from '@/components/ui/TouchButton'
-import ExportButton from '@/components/ui/ExportButton'
-import { PlusIcon, SearchIcon } from 'lucide-react'
-import { getSuppliersAction, searchSuppliersAction } from '@/lib/actions/suppliers'
-
-export default function SupplierListPage({
-  initialSuppliers,
-  initialPagination,
-  searchParams
-}) {
-  const router = useRouter()
-  const urlSearchParams = useSearchParams()
-  
-  // State management
-  const [suppliers, setSuppliers] = useState(initialSuppliers)
-  const [pagination, setPagination] = useState(initialPagination)
-  const [selectedSupplierId, setSelectedSupplierId] = useState(null)
-  const [showForm, setShowForm] = useState(false)
-  const [editingSupplier, setEditingSupplier] = useState(null)
-  const [loading, setLoading] = useState(false)
-  const [searchQuery, setSearchQuery] = useState(searchParams?.search || '')
-  const [filters, setFilters] = useState({
-    sortBy: searchParams?.sortBy || 'name',
-    sortOrder: searchParams?.sortOrder || 'asc'
-  })
-
-  // Update URL when filters change
-  const updateURL = useCallback((newFilters, newSearch) => {
-    const params = new URLSearchParams()
-    
-    if (newSearch) params.set('search', newSearch)
-    if (newFilters.sortBy !== 'name') params.set('sortBy', newFilters.sortBy)
-    if (newFilters.sortOrder !== 'asc') params.set('sortOrder', newFilters.sortOrder)
-    
-    const queryString = params.toString()
-    const newURL = queryString ? `/suppliers?${queryString}` : '/suppliers'
-    
-    router.push(newURL, { scroll: false })
-  }, [router])
-
-  // Load suppliers with current filters
-  const loadSuppliers = useCallback(async (page = 1) => {
-    setLoading(true)
-    try {
-      const searchFilters = {
-        search: searchQuery,
-        ...filters,
-        page,
-        limit: 20
-      }
-
-      const result = await getSuppliersAction(searchFilters)
-      
-      if (result.success) {
-        setSuppliers(result.suppliers)
-        setPagination(result.pagination)
-      }
-    } catch (error) {
-      console.error('Failed to load suppliers:', error)
-    } finally {
-      setLoading(false)
+export default function SupplierListPage({ session, isDemoMode }) {
+  const demoSuppliers = [
+    { 
+      id: 1, 
+      name: 'PT Supplier A', 
+      contact: 'Jl. Industri No. 123, Jakarta\nTelp: 021-1234567', 
+      products: 15,
+      lastOrder: '2024-01-20'
+    },
+    { 
+      id: 2, 
+      name: 'PT Supplier B', 
+      contact: 'Jl. Perdagangan No. 456, Surabaya\nTelp: 031-7654321', 
+      products: 8,
+      lastOrder: '2024-01-18'
     }
-  }, [searchQuery, filters])
-
-  // Handle search
-  const handleSearch = useCallback(async (query) => {
-    setSearchQuery(query)
-    updateURL(filters, query)
-    
-    if (query.length >= 2) {
-      await loadSuppliers(1)
-    } else if (query.length === 0) {
-      await loadSuppliers(1)
-    }
-  }, [filters, updateURL, loadSuppliers])
-
-  // Handle filter changes
-  const handleFilterChange = useCallback(async (newFilters) => {
-    setFilters(newFilters)
-    updateURL(newFilters, searchQuery)
-    await loadSuppliers(1)
-  }, [searchQuery, updateURL, loadSuppliers])
-
-  // Handle pagination
-  const handlePageChange = useCallback(async (page) => {
-    await loadSuppliers(page)
-  }, [loadSuppliers])
-
-  // Handle supplier selection
-  const handleSupplierSelect = useCallback((supplierId) => {
-    setSelectedSupplierId(supplierId)
-    setShowForm(false)
-    setEditingSupplier(null)
-  }, [])
-
-  // Handle supplier creation
-  const handleCreateSupplier = useCallback(() => {
-    setShowForm(true)
-    setEditingSupplier(null)
-    setSelectedSupplierId(null)
-  }, [])
-
-  // Handle supplier editing
-  const handleEditSupplier = useCallback((supplier) => {
-    setEditingSupplier(supplier)
-    setShowForm(true)
-    setSelectedSupplierId(null)
-  }, [])
-
-  // Handle form success
-  const handleFormSuccess = useCallback(async (supplier) => {
-    setShowForm(false)
-    setEditingSupplier(null)
-    
-    // Refresh suppliers list
-    await loadSuppliers(pagination.page)
-    
-    // Select the created/updated supplier
-    if (supplier) {
-      setSelectedSupplierId(supplier.id)
-    }
-  }, [loadSuppliers, pagination.page])
-
-  // Handle form cancel
-  const handleFormCancel = useCallback(() => {
-    setShowForm(false)
-    setEditingSupplier(null)
-  }, [])
-
-  // Handle supplier deletion
-  const handleSupplierDeleted = useCallback(async () => {
-    setSelectedSupplierId(null)
-    await loadSuppliers(pagination.page)
-  }, [loadSuppliers, pagination.page])
-
-  // Master content - Supplier list with filters
-  const masterContent = (
-    <div className="h-full flex flex-col bg-gray-50">
-      {/* Header */}
-      <div className="p-4 bg-white border-b border-gray-200 flex-shrink-0">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Suppliers</h1>
-            <p className="text-gray-600 mt-1">
-              {pagination.totalCount} {pagination.totalCount === 1 ? 'supplier' : 'suppliers'}
-            </p>
-          </div>
-          
-          <div className="flex items-center space-x-2">
-            <ExportButton
-              exportType="suppliers"
-              filters={{
-                search: searchQuery,
-                includeTransactionStats: true
-              }}
-              variant="outline"
-            >
-              Export Suppliers
-            </ExportButton>
-            
-            <TouchButton
-              variant="primary"
-              onClick={handleCreateSupplier}
-              className="flex items-center"
-            >
-              <PlusIcon className="h-5 w-5 mr-2" />
-              Add Supplier
-            </TouchButton>
-          </div>
-        </div>
-
-        {/* Search Bar */}
-        <div className="relative mb-4">
-          <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-          <input
-            type="text"
-            placeholder="Search suppliers by name or contact..."
-            value={searchQuery}
-            onChange={(e) => handleSearch(e.target.value)}
-            className="w-full h-12 pl-10 pr-4 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent touch-manipulation"
-          />
-        </div>
-
-        {/* Filters */}
-        <SupplierFilters
-          filters={filters}
-          onFilterChange={handleFilterChange}
-        />
-      </div>
-
-      {/* Supplier List */}
-      <div className="flex-1 overflow-y-auto">
-        <SupplierList
-          suppliers={suppliers}
-          selectedSupplierId={selectedSupplierId}
-          onSupplierSelect={handleSupplierSelect}
-          onSupplierEdit={handleEditSupplier}
-          loading={loading}
-          pagination={pagination}
-          onPageChange={handlePageChange}
-        />
-      </div>
-    </div>
-  )
-
-  // Detail content - Supplier detail or form
-  const detailContent = showForm ? (
-    <SupplierForm
-      supplier={editingSupplier}
-      onSuccess={handleFormSuccess}
-      onCancel={handleFormCancel}
-    />
-  ) : selectedSupplierId ? (
-    <SupplierDetail
-      supplierId={selectedSupplierId}
-      onEdit={handleEditSupplier}
-      onDeleted={handleSupplierDeleted}
-      onClose={() => setSelectedSupplierId(null)}
-    />
-  ) : (
-    <div className="h-full flex items-center justify-center bg-white">
-      <div className="text-center text-gray-500">
-        <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <PlusIcon className="h-12 w-12 text-gray-400" />
-        </div>
-        <h3 className="text-lg font-medium mb-2">No Supplier Selected</h3>
-        <p className="text-sm mb-4">
-          Select a supplier from the list to view details, or create a new supplier.
-        </p>
-        <TouchButton
-          variant="primary"
-          onClick={handleCreateSupplier}
-        >
-          Create New Supplier
-        </TouchButton>
-      </div>
-    </div>
-  )
+  ]
 
   return (
-    <SplitView
-      masterContent={masterContent}
-      detailContent={detailContent}
-      masterWidth="45%"
-      showDetail={showForm || selectedSupplierId !== null}
-    />
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto p-6">
+        <div className="bg-white rounded-lg shadow">
+          <div className="p-6 border-b border-gray-200">
+            <h1 className="text-2xl font-bold text-gray-900">
+              Pemasok {isDemoMode && <span className="text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded-full ml-2">Demo</span>}
+            </h1>
+            <p className="text-gray-600 mt-1">Kelola informasi pemasok</p>
+          </div>
+          
+          <div className="p-6">
+            <div className="mb-4">
+              <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                + Tambah Pemasok
+              </button>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {demoSuppliers.map((supplier) => (
+                <div key={supplier.id} className="bg-white border border-gray-200 rounded-lg p-6">
+                  <div className="flex items-start justify-between mb-4">
+                    <h3 className="text-lg font-semibold text-gray-900">{supplier.name}</h3>
+                    <div className="flex space-x-2">
+                      <button className="text-blue-600 hover:text-blue-900 text-sm">Edit</button>
+                      <button className="text-red-600 hover:text-red-900 text-sm">Hapus</button>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2 text-sm text-gray-600">
+                    <div>
+                      <strong>Kontak:</strong>
+                      <div className="whitespace-pre-line">{supplier.contact}</div>
+                    </div>
+                    <div>
+                      <strong>Produk:</strong> {supplier.products} item
+                    </div>
+                    <div>
+                      <strong>Order Terakhir:</strong> {new Date(supplier.lastOrder).toLocaleDateString('id-ID')}
+                    </div>
+                  </div>
+                  
+                  <div className="mt-4 pt-4 border-t border-gray-200">
+                    <button className="w-full bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors text-sm">
+                      Lihat Detail
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   )
 }

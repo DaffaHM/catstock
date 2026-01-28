@@ -1,89 +1,63 @@
 'use client'
 
-import { PackageIcon, AlertTriangleIcon, TrendingUpIcon, DollarSignIcon } from 'lucide-react'
+import { formatCurrency } from '@/lib/utils/currency'
 
 export default function DashboardStats({ stats }) {
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('id-ID', {
-      style: 'currency',
-      currency: 'IDR',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0
-    }).format(amount)
+  if (!stats) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        {[...Array(4)].map((_, i) => (
+          <div key={i} className="bg-white rounded-lg shadow p-6">
+            <div className="animate-pulse">
+              <div className="h-4 bg-gray-200 rounded w-24 mb-2"></div>
+              <div className="h-8 bg-gray-200 rounded w-16"></div>
+            </div>
+          </div>
+        ))}
+      </div>
+    )
   }
 
   const statCards = [
     {
-      title: 'Total Products',
+      title: 'Total Produk',
       value: stats.totalProducts,
-      icon: PackageIcon,
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-50',
-      description: 'Products in catalog'
+      icon: '📦',
+      color: 'blue'
     },
     {
-      title: 'Low Stock Items',
-      value: stats.lowStockCount,
-      icon: AlertTriangleIcon,
-      color: stats.lowStockCount > 0 ? 'text-red-600' : 'text-green-600',
-      bgColor: stats.lowStockCount > 0 ? 'bg-red-50' : 'bg-green-50',
-      description: 'Need attention',
-      urgent: stats.lowStockCount > 0
+      title: 'Pemasok',
+      value: stats.totalSuppliers,
+      icon: '🏢',
+      color: 'green'
     },
     {
-      title: "Today's Transactions",
-      value: stats.todayTransactions,
-      icon: TrendingUpIcon,
-      color: 'text-green-600',
-      bgColor: 'bg-green-50',
-      description: 'Transactions today'
+      title: 'Transaksi',
+      value: stats.totalTransactions,
+      icon: '📊',
+      color: 'purple'
     },
     {
-      title: 'Total Stock Value',
-      value: formatCurrency(stats.totalStockValue),
-      icon: DollarSignIcon,
-      color: 'text-purple-600',
-      bgColor: 'bg-purple-50',
-      description: 'Current inventory value',
-      isMonetary: true
+      title: 'Nilai Total',
+      value: formatCurrency(stats.totalValue),
+      icon: '💰',
+      color: 'yellow'
     }
   ]
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-      {statCards.map((stat, index) => {
-        const Icon = stat.icon
-        
-        return (
-          <div key={index} className="card hover:shadow-md transition-shadow duration-200">
-            <div className="card-body">
-              <div className="flex items-center justify-between mb-4">
-                <div className={`p-3 rounded-lg ${stat.bgColor}`}>
-                  <Icon className={`w-6 h-6 ${stat.color}`} />
-                </div>
-                {stat.urgent && (
-                  <div className="flex items-center gap-1 text-red-600 text-sm font-medium">
-                    <AlertTriangleIcon className="w-4 h-4" />
-                    <span>Alert</span>
-                  </div>
-                )}
-              </div>
-              
-              <div className="space-y-2">
-                <h3 className="text-sm font-medium text-gray-600 uppercase tracking-wide">
-                  {stat.title}
-                </h3>
-                <p className={`text-3xl font-bold ${stat.color} ${stat.isMonetary ? 'text-2xl' : ''}`}>
-                  {stat.value}
-                </p>
-                <p className="text-sm text-gray-500">
-                  {stat.description}
-                </p>
-              </div>
+      {statCards.map((card, index) => (
+        <div key={index} className="bg-white rounded-lg shadow p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600">{card.title}</p>
+              <p className="text-2xl font-bold text-gray-900">{card.value}</p>
             </div>
+            <div className="text-3xl">{card.icon}</div>
           </div>
-        )
-      })}
+        </div>
+      ))}
     </div>
   )
 }

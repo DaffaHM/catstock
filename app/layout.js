@@ -5,7 +5,6 @@ import ResponsiveLayout from '@/components/layout/ResponsiveLayout'
 const inter = Inter({ 
   subsets: ['latin'],
   display: 'swap',
-  // Optimize for iPad readability
   variable: '--font-inter',
 })
 
@@ -26,21 +25,18 @@ export const viewport = {
   width: 'device-width',
   initialScale: 1,
   maximumScale: 1,
-  userScalable: false, // Prevent zoom on iPad
+  userScalable: false,
 }
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className={inter.variable}>
+    <html lang="id" className={inter.variable}>
       <head>
         {/* iPad-specific meta tags */}
-        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content="CatStock" />
         <meta name="format-detection" content="telephone=no" />
-        
-        {/* Prevent zoom on input focus for iPad */}
-        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
         
         {/* Favicon */}
         <link rel="icon" href="/favicon.ico" />

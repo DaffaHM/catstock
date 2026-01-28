@@ -1,268 +1,71 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
-import SplitView from '@/components/layout/SplitView'
-import ProductList from './ProductList'
-import ProductDetail from './ProductDetail'
-import ProductForm from './ProductForm'
-import ProductFilters from './ProductFilters'
-import TouchButton from '@/components/ui/TouchButton'
-import ExportButton from '@/components/ui/ExportButton'
-import { PlusIcon, SearchIcon } from 'lucide-react'
-import { getProductsAction, searchProductsAction } from '@/lib/actions/products'
-
-export default function ProductListPage({
-  initialProducts,
-  initialPagination,
-  categories,
-  brands,
-  searchParams
-}) {
-  const router = useRouter()
-  const urlSearchParams = useSearchParams()
-  
-  // State management
-  const [products, setProducts] = useState(initialProducts)
-  const [pagination, setPagination] = useState(initialPagination)
-  const [selectedProductId, setSelectedProductId] = useState(null)
-  const [showForm, setShowForm] = useState(false)
-  const [editingProduct, setEditingProduct] = useState(null)
-  const [loading, setLoading] = useState(false)
-  const [searchQuery, setSearchQuery] = useState(searchParams?.search || '')
-  const [filters, setFilters] = useState({
-    category: searchParams?.category || '',
-    brand: searchParams?.brand || '',
-    sortBy: searchParams?.sortBy || 'name',
-    sortOrder: searchParams?.sortOrder || 'asc'
-  })
-
-  // Update URL when filters change
-  const updateURL = useCallback((newFilters, newSearch) => {
-    const params = new URLSearchParams()
-    
-    if (newSearch) params.set('search', newSearch)
-    if (newFilters.category) params.set('category', newFilters.category)
-    if (newFilters.brand) params.set('brand', newFilters.brand)
-    if (newFilters.sortBy !== 'name') params.set('sortBy', newFilters.sortBy)
-    if (newFilters.sortOrder !== 'asc') params.set('sortOrder', newFilters.sortOrder)
-    
-    const queryString = params.toString()
-    const newURL = queryString ? `/products?${queryString}` : '/products'
-    
-    router.push(newURL, { scroll: false })
-  }, [router])
-
-  // Load products with current filters
-  const loadProducts = useCallback(async (page = 1) => {
-    setLoading(true)
-    try {
-      const searchFilters = {
-        search: searchQuery,
-        ...filters,
-        page,
-        limit: 20
-      }
-
-      const result = await getProductsAction(searchFilters)
-      
-      if (result.success) {
-        setProducts(result.products)
-        setPagination(result.pagination)
-      }
-    } catch (error) {
-      console.error('Failed to load products:', error)
-    } finally {
-      setLoading(false)
-    }
-  }, [searchQuery, filters])
-
-  // Handle search
-  const handleSearch = useCallback(async (query) => {
-    setSearchQuery(query)
-    updateURL(filters, query)
-    
-    if (query.length >= 2) {
-      await loadProducts(1)
-    } else if (query.length === 0) {
-      await loadProducts(1)
-    }
-  }, [filters, updateURL, loadProducts])
-
-  // Handle filter changes
-  const handleFilterChange = useCallback(async (newFilters) => {
-    setFilters(newFilters)
-    updateURL(newFilters, searchQuery)
-    await loadProducts(1)
-  }, [searchQuery, updateURL, loadProducts])
-
-  // Handle pagination
-  const handlePageChange = useCallback(async (page) => {
-    await loadProducts(page)
-  }, [loadProducts])
-
-  // Handle product selection
-  const handleProductSelect = useCallback((productId) => {
-    setSelectedProductId(productId)
-    setShowForm(false)
-    setEditingProduct(null)
-  }, [])
-
-  // Handle product creation
-  const handleCreateProduct = useCallback(() => {
-    setShowForm(true)
-    setEditingProduct(null)
-    setSelectedProductId(null)
-  }, [])
-
-  // Handle product editing
-  const handleEditProduct = useCallback((product) => {
-    setEditingProduct(product)
-    setShowForm(true)
-    setSelectedProductId(null)
-  }, [])
-
-  // Handle form success
-  const handleFormSuccess = useCallback(async (product) => {
-    setShowForm(false)
-    setEditingProduct(null)
-    
-    // Refresh products list
-    await loadProducts(pagination.page)
-    
-    // Select the created/updated product
-    if (product) {
-      setSelectedProductId(product.id)
-    }
-  }, [loadProducts, pagination.page])
-
-  // Handle form cancel
-  const handleFormCancel = useCallback(() => {
-    setShowForm(false)
-    setEditingProduct(null)
-  }, [])
-
-  // Handle product deletion
-  const handleProductDeleted = useCallback(async () => {
-    setSelectedProductId(null)
-    await loadProducts(pagination.page)
-  }, [loadProducts, pagination.page])
-
-  // Master content - Product list with filters
-  const masterContent = (
-    <div className="h-full flex flex-col bg-gray-50">
-      {/* Header */}
-      <div className="p-4 bg-white border-b border-gray-200 flex-shrink-0">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Products</h1>
-            <p className="text-gray-600 mt-1">
-              {pagination.totalCount} {pagination.totalCount === 1 ? 'product' : 'products'}
-            </p>
-          </div>
-          
-          <div className="flex items-center space-x-2">
-            <ExportButton
-              exportType="products"
-              filters={{
-                search: searchQuery,
-                category: filters.category,
-                brand: filters.brand,
-                includeStockLevels: true
-              }}
-              variant="outline"
-            >
-              Export Products
-            </ExportButton>
-            
-            <TouchButton
-              variant="primary"
-              onClick={handleCreateProduct}
-              className="flex items-center"
-            >
-              <PlusIcon className="h-5 w-5 mr-2" />
-              Add Product
-            </TouchButton>
-          </div>
-        </div>
-
-        {/* Search Bar */}
-        <div className="relative mb-4">
-          <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-          <input
-            type="text"
-            placeholder="Search products by name, brand, or SKU..."
-            value={searchQuery}
-            onChange={(e) => handleSearch(e.target.value)}
-            className="w-full h-12 pl-10 pr-4 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent touch-manipulation"
-          />
-        </div>
-
-        {/* Filters */}
-        <ProductFilters
-          filters={filters}
-          categories={categories}
-          brands={brands}
-          onFilterChange={handleFilterChange}
-        />
-      </div>
-
-      {/* Product List */}
-      <div className="flex-1 overflow-y-auto">
-        <ProductList
-          products={products}
-          selectedProductId={selectedProductId}
-          onProductSelect={handleProductSelect}
-          onProductEdit={handleEditProduct}
-          loading={loading}
-          pagination={pagination}
-          onPageChange={handlePageChange}
-        />
-      </div>
-    </div>
-  )
-
-  // Detail content - Product detail or form
-  const detailContent = showForm ? (
-    <ProductForm
-      product={editingProduct}
-      categories={categories}
-      onSuccess={handleFormSuccess}
-      onCancel={handleFormCancel}
-    />
-  ) : selectedProductId ? (
-    <ProductDetail
-      productId={selectedProductId}
-      onEdit={handleEditProduct}
-      onDeleted={handleProductDeleted}
-      onClose={() => setSelectedProductId(null)}
-    />
-  ) : (
-    <div className="h-full flex items-center justify-center bg-white">
-      <div className="text-center text-gray-500">
-        <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <PlusIcon className="h-12 w-12 text-gray-400" />
-        </div>
-        <h3 className="text-lg font-medium mb-2">No Product Selected</h3>
-        <p className="text-sm mb-4">
-          Select a product from the list to view details, or create a new product.
-        </p>
-        <TouchButton
-          variant="primary"
-          onClick={handleCreateProduct}
-        >
-          Create New Product
-        </TouchButton>
-      </div>
-    </div>
-  )
+export default function ProductListPage({ session, isDemoMode }) {
+  const demoProducts = [
+    { id: 1, name: 'Cat Tembok Putih 5L', brand: 'Dulux', category: 'Cat Tembok', stock: 15, price: 125000 },
+    { id: 2, name: 'Cat Kayu Coklat 2.5L', brand: 'Avian', category: 'Cat Kayu', stock: 8, price: 85000 },
+    { id: 3, name: 'Cat Besi Hitam 1L', brand: 'Nippon', category: 'Cat Besi', stock: 12, price: 45000 },
+    { id: 4, name: 'Cat Tembok Biru 5L', brand: 'Dulux', category: 'Cat Tembok', stock: 6, price: 130000 }
+  ]
 
   return (
-    <SplitView
-      masterContent={masterContent}
-      detailContent={detailContent}
-      masterWidth="45%"
-      showDetail={showForm || selectedProductId !== null}
-    />
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto p-6">
+        <div className="bg-white rounded-lg shadow">
+          <div className="p-6 border-b border-gray-200">
+            <h1 className="text-2xl font-bold text-gray-900">
+              Produk {isDemoMode && <span className="text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded-full ml-2">Demo</span>}
+            </h1>
+            <p className="text-gray-600 mt-1">Kelola katalog produk toko cat</p>
+          </div>
+          
+          <div className="p-6">
+            <div className="mb-4">
+              <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                + Tambah Produk
+              </button>
+            </div>
+            
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Produk</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Brand</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kategori</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stok</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Harga</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {demoProducts.map((product) => (
+                    <tr key={product.id}>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="font-medium text-gray-900">{product.name}</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-gray-500">{product.brand}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-gray-500">{product.category}</td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`px-2 py-1 text-xs rounded-full ${product.stock < 10 ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}`}>
+                          {product.stock} unit
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-gray-500">
+                        Rp {product.price.toLocaleString('id-ID')}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <button className="text-blue-600 hover:text-blue-900 mr-3">Edit</button>
+                        <button className="text-red-600 hover:text-red-900">Hapus</button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   )
 }
