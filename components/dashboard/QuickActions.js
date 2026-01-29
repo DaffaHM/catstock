@@ -24,18 +24,32 @@ export default function QuickActions() {
       color: 'blue'
     },
     {
-      title: 'Laporan',
-      description: 'Lihat laporan',
+      title: 'Laporan Harian',
+      description: 'Penjualan per hari',
+      href: '/reports/daily-reports',
+      icon: '📈',
+      color: 'emerald'
+    },
+    {
+      title: 'Laporan Stok',
+      description: 'Lihat semua laporan',
       href: '/reports',
       icon: '📊',
       color: 'purple'
+    },
+    {
+      title: 'Analisis Profit',
+      description: 'Keuntungan produk',
+      href: '/profit-analysis',
+      icon: '💎',
+      color: 'yellow'
     }
   ]
 
   return (
     <div className="mb-8">
       <h2 className="text-lg font-semibold text-gray-900 mb-4">Aksi Cepat</h2>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         {actions.map((action, index) => (
           <a
             key={index}

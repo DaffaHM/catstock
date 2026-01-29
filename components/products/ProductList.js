@@ -115,6 +115,12 @@ export default function ProductList({
                       <span>{product.category}</span>
                       <span className="mx-2">•</span>
                       <span>{product.size}</span>
+                      {product.paintColor && (
+                        <>
+                          <span className="mx-2">•</span>
+                          <span className="text-blue-600 font-medium">🎨 {product.paintColor}</span>
+                        </>
+                      )}
                     </div>
                   </div>
 
@@ -166,6 +172,12 @@ export default function ProductList({
                       <div>
                         <span className="text-gray-500">Unit:</span>
                         <span className="ml-2 font-medium">{product.unit}</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-500">Warna Cat:</span>
+                        <span className="ml-2 font-medium text-blue-600">
+                          {product.paintColor || 'Tidak ada warna'}
+                        </span>
                       </div>
                       <div>
                         <span className="text-gray-500">Created:</span>

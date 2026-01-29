@@ -34,6 +34,7 @@ model Product {
   name          String
   category      String
   size          String
+  paintColor    String?
   unit          String
   purchasePrice Float?
   sellingPrice  Float?

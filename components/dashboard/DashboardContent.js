@@ -131,18 +131,20 @@ export default function DashboardContent({ session, isDemoMode = false }) {
   const handleResetAllData = async () => {
     try {
       setResetting(true)
-      console.log('[Dashboard] Resetting all demo data')
+      console.log('[Dashboard] Resetting all demo data to empty state')
       
-      // Reset all localStorage data
+      // Reset all localStorage data to empty state
       resetDemoProducts()
       resetDemoSuppliers()
       resetDemoTransactions()
       
+      // Set empty arrays for all data to ensure clean state
+      localStorage.setItem('demo-products', JSON.stringify([]))
+      localStorage.setItem('demo-suppliers', JSON.stringify([]))
+      localStorage.setItem('demo-transactions', JSON.stringify([]))
+      
       // Clear any other localStorage keys
       const keysToRemove = [
-        'demo-products',
-        'demo-suppliers', 
-        'demo-transactions',
         'deleted-demo-products',
         'deleted-demo-suppliers'
       ]
@@ -155,7 +157,7 @@ export default function DashboardContent({ session, isDemoMode = false }) {
         }
       })
       
-      console.log('[Dashboard] All demo data cleared')
+      console.log('[Dashboard] All demo data cleared and set to empty state')
       
       // Refresh dashboard data
       const demoData = getDemoDashboardData()
@@ -169,7 +171,7 @@ export default function DashboardContent({ session, isDemoMode = false }) {
       setShowResetConfirm(false)
       
       // Show success message
-      alert('Semua data berhasil direset! Aplikasi kembali ke kondisi awal.')
+      alert('Semua data berhasil direset! Aplikasi kembali ke kondisi kosong.')
       
     } catch (error) {
       console.error('Error resetting data:', error)

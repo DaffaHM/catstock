@@ -2,6 +2,7 @@ import { getSession } from '@/lib/auth'
 import { getQuickSession } from '@/lib/auth-quick'
 import SimpleNavLayout from '@/components/layout/SimpleNavLayout'
 import CurrentStockReportPage from '@/components/reports/CurrentStockReportPage'
+import ReportsNavigation from '@/components/reports/ReportsNavigation'
 
 export const metadata = {
   title: 'Laporan - CatStock',
@@ -45,7 +46,15 @@ export default async function ReportsPage() {
 
   return (
     <SimpleNavLayout>
-      <CurrentStockReportPage session={session} isDemoMode={isDemoMode} />
+      <div className="container mx-auto px-4 py-8">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Laporan</h1>
+          <p className="text-gray-600">Kelola dan lihat berbagai laporan bisnis Anda</p>
+        </div>
+        
+        <ReportsNavigation />
+        <CurrentStockReportPage session={session} isDemoMode={isDemoMode} />
+      </div>
     </SimpleNavLayout>
   )
 }

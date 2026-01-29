@@ -32,14 +32,20 @@ export default function DatePicker({
   const formatInputDate = (date) => {
     if (!date) return ''
     const d = new Date(date)
-    return d.toISOString().split('T')[0]
+    // Use local timezone to avoid date shifting
+    const year = d.getFullYear()
+    const month = String(d.getMonth() + 1).padStart(2, '0')
+    const day = String(d.getDate()).padStart(2, '0')
+    return `${year}-${month}-${day}`
   }
 
   // Handle date change
   const handleDateChange = (e) => {
     const dateValue = e.target.value
     if (dateValue) {
-      const date = new Date(dateValue + 'T00:00:00')
+      // Create date in local timezone to avoid timezone shift
+      const [year, month, day] = dateValue.split('-').map(Number)
+      const date = new Date(year, month - 1, day, 12, 0, 0, 0) // Set to noon to avoid timezone issues
       onChange(date)
     } else {
       onChange(null)

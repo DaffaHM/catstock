@@ -31,9 +31,11 @@ export default function ProductForm({ product, categories, onSuccess, onCancel, 
     name: product?.name || '',
     category: product?.category || '',
     size: product?.size || '',
+    paintColor: product?.paintColor || '',
     unit: product?.unit || 'Each',
     purchasePrice: product?.purchasePrice || '',
     sellingPrice: product?.sellingPrice || '',
+    profitMargin: product?.profitMargin || '',
     minimumStock: product?.minimumStock || ''
   })
 
@@ -64,17 +66,19 @@ export default function ProductForm({ product, categories, onSuccess, onCancel, 
         return
       }
       
-      // Create new product for demo mode
-      const newProduct = {
+      // Create or update product for demo mode
+      const productData = {
         id: isEditing ? product.id : `demo-prod-${Date.now()}`,
         sku: formData.sku,
         brand: formData.brand,
         name: formData.name,
         category: formData.category,
         size: formData.size,
+        paintColor: formData.paintColor,
         unit: formData.unit,
         purchasePrice: parseFloat(formData.purchasePrice) || 0,
         sellingPrice: parseFloat(formData.sellingPrice) || 0,
+        profitMargin: parseFloat(formData.profitMargin) || 0,
         minimumStock: parseInt(formData.minimumStock) || 0,
         currentStock: product?.currentStock || 0,
         transactionCount: product?.transactionCount || 0,
@@ -82,8 +86,11 @@ export default function ProductForm({ product, categories, onSuccess, onCancel, 
         updatedAt: new Date().toISOString()
       }
       
-      console.log('Demo product created:', newProduct)
-      onSuccess(newProduct)
+      // Save to localStorage
+      saveDemoProduct(productData)
+      
+      console.log(isEditing ? 'Demo product updated:' : 'Demo product created:', productData)
+      onSuccess(productData)
       return
     }
     
@@ -108,7 +115,31 @@ export default function ProductForm({ product, categories, onSuccess, onCancel, 
   }, [state?.errors])
 
   const handleInputChange = (name, value) => {
-    setFormData(prev => ({ ...prev, [name]: value }))
+    setFormData(prev => {
+      const newData = { ...prev, [name]: value }
+      
+      // Auto-calculate selling price when profit margin percentage is entered
+      if (name === 'profitMargin' && newData.purchasePrice) {
+        const purchasePrice = parseFloat(newData.purchasePrice) || 0
+        const marginPercent = parseFloat(value) || 0
+        if (purchasePrice > 0 && marginPercent > 0) {
+          const sellingPrice = purchasePrice * (1 + marginPercent / 100)
+          newData.sellingPrice = Math.round(sellingPrice).toString()
+        }
+      }
+      
+      // Auto-calculate selling price when purchase price changes and margin is set
+      if (name === 'purchasePrice' && newData.profitMargin) {
+        const purchasePrice = parseFloat(value) || 0
+        const marginPercent = parseFloat(newData.profitMargin) || 0
+        if (purchasePrice > 0 && marginPercent > 0) {
+          const sellingPrice = purchasePrice * (1 + marginPercent / 100)
+          newData.sellingPrice = Math.round(sellingPrice).toString()
+        }
+      }
+      
+      return newData
+    })
   }
 
   const validatePrices = () => {
@@ -266,6 +297,16 @@ export default function ProductForm({ product, categories, onSuccess, onCancel, 
               required
               placeholder="e.g., 1 Galon, 5 Liter"
             />
+
+            <TouchInput
+              label="Warna Cat"
+              name="paintColor"
+              value={formData.paintColor}
+              onChange={(e) => handleInputChange('paintColor', e.target.value)}
+              error={state?.errors?.paintColor}
+              placeholder="e.g., Putih, Biru Laut, Hijau Daun"
+              className="capitalize"
+            />
           </div>
 
           {/* Pricing Information */}
@@ -274,7 +315,7 @@ export default function ProductForm({ product, categories, onSuccess, onCancel, 
               Informasi Harga
             </h3>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
               <TouchInput
                 label="Harga Beli"
                 name="purchasePrice"
@@ -285,6 +326,19 @@ export default function ProductForm({ product, categories, onSuccess, onCancel, 
                 onChange={(e) => handleInputChange('purchasePrice', e.target.value)}
                 error={state?.errors?.purchasePrice}
                 placeholder="0"
+              />
+
+              <TouchInput
+                label="Margin Keuntungan (%)"
+                name="profitMargin"
+                type="number"
+                step="1"
+                min="0"
+                max="1000"
+                value={formData.profitMargin}
+                onChange={(e) => handleInputChange('profitMargin', e.target.value)}
+                error={state?.errors?.profitMargin}
+                placeholder="e.g., 25"
               />
 
               <TouchInput
@@ -311,7 +365,7 @@ export default function ProductForm({ product, categories, onSuccess, onCancel, 
             {formData.purchasePrice && formData.sellingPrice && !priceWarning && (
               <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-green-800">Margin Keuntungan:</span>
+                  <span className="text-sm font-medium text-green-800">Keuntungan:</span>
                   <div className="text-right">
                     <span className="text-lg font-bold text-green-900">
                       {formatRupiah(parseFloat(formData.sellingPrice) - parseFloat(formData.purchasePrice))}
@@ -320,6 +374,10 @@ export default function ProductForm({ product, categories, onSuccess, onCancel, 
                       ({Math.round(((parseFloat(formData.sellingPrice) - parseFloat(formData.purchasePrice)) / parseFloat(formData.purchasePrice)) * 100)}%)
                     </span>
                   </div>
+                </div>
+                <div className="mt-2 text-xs text-green-700">
+                  <strong>Tips:</strong> Anda bebas mengatur margin keuntungan sesuai keinginan. 
+                  Masukkan persentase margin atau edit langsung harga jual.
                 </div>
               </div>
             )}

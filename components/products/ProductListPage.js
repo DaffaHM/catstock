@@ -143,17 +143,22 @@ export default function ProductListPage({ session, isDemoMode }) {
   }
 
   const handleFormSuccess = (product) => {
-    console.log('Form success, new product:', product)
+    console.log('Form success, product:', product)
     setShowForm(false)
     setEditingProduct(null)
     
     if (isDemoMode) {
       // In demo mode, handle client-side
-      if (!editingProduct && product) {
-        // Save to localStorage
-        saveDemoProduct(product)
+      if (editingProduct) {
+        // Update existing product in the list
+        setProducts(prevProducts => 
+          prevProducts.map(p => p.id === product.id ? product : p)
+        )
         
-        // Add to current list immediately
+        // Notify other components that products have been updated
+        window.dispatchEvent(new CustomEvent('productsUpdated', { detail: product }))
+      } else {
+        // Add new product to the list
         setProducts(prevProducts => {
           const exists = prevProducts.find(p => p.id === product.id)
           if (!exists) {
@@ -377,6 +382,9 @@ export default function ProductListPage({ session, isDemoMode }) {
                       Produk
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Warna Cat
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Kategori
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -411,6 +419,17 @@ export default function ProductListPage({ session, isDemoMode }) {
                             {product.size} {product.unit}
                           </div>
                         </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        {product.paintColor ? (
+                          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gradient-to-r from-blue-100 to-purple-100 text-gray-800 border border-gray-200">
+                            🎨 {product.paintColor}
+                          </span>
+                        ) : (
+                          <span className="text-sm text-gray-400 italic">
+                            Tidak ada warna
+                          </span>
+                        )}
                       </td>
                       <td className="px-6 py-4">
                         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
